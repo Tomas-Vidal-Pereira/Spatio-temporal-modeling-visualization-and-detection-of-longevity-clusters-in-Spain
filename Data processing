@@ -4532,3 +4532,586 @@ largest_SR_65 <- rbind(largest_12,largest_14,largest_16,largest_18,
                      largest_20,largest_22)
 combined_SR_65 <- cbind(largest_SR_65, smallest_SR_65[,c("PROV","SR_65")])
 combined_SR_65
+
+### Time series
+teruel <- c(
+  mf_12[mf_12$PROV == "Teruel", "SR_65"][[1]],
+  mf_14[mf_14$PROV == "Teruel", "SR_65"][[1]],
+  mf_16[mf_16$PROV == "Teruel", "SR_65"][[1]],
+  mf_18[mf_18$PROV == "Teruel", "SR_65"][[1]],
+  mf_20[mf_20$PROV == "Teruel", "SR_65"][[1]],
+  mf_22[mf_22$PROV == "Teruel", "SR_65"][[1]]
+)
+alava <- c(
+  mf_12[mf_12$PROV == "Alava", "SR_65"][[1]],
+  mf_14[mf_14$PROV == "Alava", "SR_65"][[1]],
+  mf_16[mf_16$PROV == "Alava", "SR_65"][[1]],
+  mf_18[mf_18$PROV == "Alava", "SR_65"][[1]],
+  mf_20[mf_20$PROV == "Alava", "SR_65"][[1]],
+  mf_22[mf_22$PROV == "Alava", "SR_65"][[1]]
+)
+avila <- c(
+  mf_12[mf_12$PROV == "Avila", "SR_65"][[1]],
+  mf_14[mf_14$PROV == "Avila", "SR_65"][[1]],
+  mf_16[mf_16$PROV == "Avila", "SR_65"][[1]],
+  mf_18[mf_18$PROV == "Avila", "SR_65"][[1]],
+  mf_20[mf_20$PROV == "Avila", "SR_65"][[1]],
+  mf_22[mf_22$PROV == "Avila", "SR_65"][[1]]
+)
+madrid <- c(
+  mf_12[mf_12$PROV == "Madrid", "SR_65"][[1]],
+  mf_14[mf_14$PROV == "Madrid", "SR_65"][[1]],
+  mf_16[mf_16$PROV == "Madrid", "SR_65"][[1]],
+  mf_18[mf_18$PROV == "Madrid", "SR_65"][[1]],
+  mf_20[mf_20$PROV == "Madrid", "SR_65"][[1]],
+  mf_22[mf_22$PROV == "Madrid", "SR_65"][[1]]
+)
+bizkaia <- c(
+  mf_12[mf_12$PROV == "Bizkaia", "SR_65"][[1]],
+  mf_14[mf_14$PROV == "Bizkaia", "SR_65"][[1]],
+  mf_16[mf_16$PROV == "Bizkaia", "SR_65"][[1]],
+  mf_18[mf_18$PROV == "Bizkaia", "SR_65"][[1]],
+  mf_20[mf_20$PROV == "Bizkaia", "SR_65"][[1]],
+  mf_22[mf_22$PROV == "Bizkaia", "SR_65"][[1]]
+)
+asturias <- c(
+  mf_12[mf_12$PROV == "Asturias", "SR_65"][[1]],
+  mf_14[mf_14$PROV == "Asturias", "SR_65"][[1]],
+  mf_16[mf_16$PROV == "Asturias", "SR_65"][[1]],
+  mf_18[mf_18$PROV == "Asturias", "SR_65"][[1]],
+  mf_20[mf_20$PROV == "Asturias", "SR_65"][[1]],
+  mf_22[mf_22$PROV == "Asturias", "SR_65"][[1]]
+)
+data_short <- data.frame(
+  Year = c(2012, 2014, 2016, 2018, 2020, 2022),
+  Teruel = teruel,
+  Alava = alava,
+  Avila = avila,
+  Madrid = madrid,
+  Bizkaia = bizkaia,
+  Asturias = asturias
+)
+# TIME SERIES
+data_long <- gather(data_short, key = "Province", value = "LocationIndex", -Year)
+ggplot(data_long, aes(x = Year, y = LocationIndex, color = Province, group = Province)) +
+  geom_line(linewidth = 1) +
+  geom_point(linewidth = 2) +
+  scale_x_continuous(
+    breaks = c(2012, 2014, 2016, 2018, 2020, 2022)
+  ) +
+  labs(title = NULL,
+       x = "Year",
+       y = "SR (>65)",
+       color = "Province") +
+  theme_minimal()+
+  theme(
+    legend.text = element_text(size = 18),  
+    legend.title = element_text(size = 18)    
+  )
+
+#####################################################
+# SEX RATIO AGES 85 AND ABOVE (PROVINCES)
+#####################################################
+
+### 2012
+plot_SR85_12 <- ggplot(provs_12) +
+  geom_sf(aes(fill = SR_85), alpha = 0.9, color=NA) +
+  scale_fill_gradientn(
+    colors = hcl.colors(100, "Red-Green"),
+    breaks = breaks_85,
+    limits = limits_85,
+    labels = scales::label_comma(),
+    guide = guide_legend()
+  ) +
+  labs(
+    fill = "SR (>85)",
+    title = "2012"
+  ) +
+  theme_void() +
+  theme(
+    plot.background = element_rect("grey80"),
+    text = element_text(face = "bold"),
+    plot.title = element_text(hjust = .5),
+    plot.subtitle = element_text(hjust = .5)
+  )
+### 2014
+plot_SR85_14 <- ggplot(provs_14) +
+  geom_sf(aes(fill = SR_85), alpha = 0.9, color=NA) +
+  scale_fill_gradientn(
+    colors = hcl.colors(100, "Red-Green"),
+    breaks = breaks_85,
+    limits = limits_85,
+    labels = scales::label_comma(),
+    guide = guide_legend()
+  ) +
+  labs(
+    fill = "SR (>85)",
+    title = "2014"
+  ) +
+  theme_void() +
+  theme(
+    plot.background = element_rect("grey80"),
+    text = element_text(face = "bold"),
+    plot.title = element_text(hjust = .5),
+    plot.subtitle = element_text(hjust = .5)
+  )
+### 2016
+plot_SR85_16 <- ggplot(provs_16) +
+  geom_sf(aes(fill = SR_85), alpha = 0.9, color=NA) +
+  scale_fill_gradientn(
+    colors = hcl.colors(100, "Red-Green"),
+    breaks = breaks_85,
+    limits = limits_85,
+    labels = scales::label_comma(),
+    guide = guide_legend()
+  ) +
+  labs(
+    fill = "SR (>85)",
+    title = "2016"
+  ) +
+  theme_void() +
+  theme(
+    plot.background = element_rect("grey80"),
+    text = element_text(face = "bold"),
+    plot.title = element_text(hjust = .5),
+    plot.subtitle = element_text(hjust = .5)
+  )
+### 2018
+plot_SR85_18 <- ggplot(provs_18) +
+  geom_sf(aes(fill = SR_85), alpha = 0.9, color=NA) +
+  scale_fill_gradientn(
+    colors = hcl.colors(100, "Red-Green"),
+    breaks = breaks_85,
+    limits = limits_85,
+    labels = scales::label_comma(),
+    guide = guide_legend()
+  ) +
+  labs(
+    fill = "SR (>85)",
+    title = "2018"
+  ) +
+  theme_void() +
+  theme(
+    plot.background = element_rect("grey80"),
+    text = element_text(face = "bold"),
+    plot.title = element_text(hjust = .5),
+    plot.subtitle = element_text(hjust = .5)
+  )
+### 2020
+plot_SR85_20 <- ggplot(provs_20) +
+  geom_sf(aes(fill = SR_85), alpha = 0.9, color=NA) +
+  scale_fill_gradientn(
+    colors = hcl.colors(100, "Red-Green"),
+    breaks = breaks_85,
+    limits = limits_85,
+    labels = scales::label_comma(),
+    guide = guide_legend()
+  ) +
+  labs(
+    fill = "SR (>85)",
+    title = "2020"
+  ) +
+  theme_void() +
+  theme(
+    plot.background = element_rect("grey80"),
+    text = element_text(face = "bold"),
+    plot.title = element_text(hjust = .5),
+    plot.subtitle = element_text(hjust = .5)
+  )
+### 2022
+plot_SR85_22 <- ggplot(provs_22) +
+  geom_sf(aes(fill = SR_85), alpha = 0.9, color=NA) +
+  scale_fill_gradientn(
+    colors = hcl.colors(100, "Red-Green"),
+    breaks = breaks_85,
+    limits = limits_85,
+    labels = scales::label_comma(),
+    guide = guide_legend()
+  ) +
+  labs(
+    fill = "SR (>85)",
+    title = "2022"
+  ) +
+  theme_void() +
+  theme(
+    plot.background = element_rect("grey80"),
+    text = element_text(face = "bold"),
+    plot.title = element_text(hjust = .5),
+    plot.subtitle = element_text(hjust = .5)
+  )
+# Combine all the plots
+grid.arrange( plot_SR85_12, plot_SR85_14, plot_SR85_16, plot_SR85_18, plot_SR85_20, plot_SR85_22, nrow = 3, ncol = 2, 
+             widths = unit(c(8,8), "cm"),
+             heights = unit(c(5, 5, 5), "cm"))
+### Tables
+wanted_cols <- c("year","PROV", "SR_85")
+# 2012
+# Order by SR_85 to get the smallest values
+mf_12_sorted_asc <- mf_12[order(mf_12$SR_85), ]
+# Extract the 3 smallest values
+smallest_12 <- head(mf_12_sorted_asc[,wanted_cols], 3)
+# Order by SR_85 to get the largest values
+mf_12_sorted_desc <- mf_12[order(mf_12$SR_85, decreasing = TRUE), ]
+# Extract the 3 largest values
+largest_12 <- head(mf_12_sorted_desc[,wanted_cols], 3)
+# 2014
+mf_14_sorted_asc <- mf_14[order(mf_14$SR_85), ]
+smallest_14 <- head(mf_14_sorted_asc[,wanted_cols], 3)
+mf_14_sorted_desc <- mf_14[order(mf_14$SR_85, decreasing = TRUE), ]
+largest_14 <- head(mf_14_sorted_desc[,wanted_cols], 3)
+# 2016
+mf_16_sorted_asc <- mf_16[order(mf_16$SR_85), ]
+smallest_16 <- head(mf_16_sorted_asc[,wanted_cols], 3)
+mf_16_sorted_desc <- mf_16[order(mf_16$SR_85, decreasing = TRUE), ]
+largest_16 <- head(mf_16_sorted_desc[,wanted_cols], 3)
+# 2018
+mf_18_sorted_asc <- mf_18[order(mf_18$SR_85), ]
+smallest_18 <- head(mf_18_sorted_asc[,wanted_cols], 3)
+mf_18_sorted_desc <- mf_18[order(mf_18$SR_85, decreasing = TRUE), ]
+largest_18 <- head(mf_18_sorted_desc[,wanted_cols], 3)
+# 2020
+mf_20_sorted_asc <- mf_20[order(mf_20$SR_85), ]
+smallest_20 <- head(mf_20_sorted_asc[,wanted_cols], 3)
+mf_20_sorted_desc <- mf_20[order(mf_20$SR_85, decreasing = TRUE), ]
+largest_20 <- head(mf_20_sorted_desc[,wanted_cols], 3)
+# 2022
+mf_22_sorted_asc <- mf_22[order(mf_22$SR_85), ]
+smallest_22 <- head(mf_22_sorted_asc[,wanted_cols], 3)
+mf_22_sorted_desc <- mf_22[order(mf_22$SR_85, decreasing = TRUE), ]
+largest_22 <- head(mf_22_sorted_desc[,wanted_cols], 3)
+# Combination
+smallest_SR_85 <- rbind(smallest_12,smallest_14,smallest_16,
+                     smallest_18,smallest_20,smallest_22)
+largest_SR_85 <- rbind(largest_12,largest_14,largest_16,largest_18,
+                     largest_20,largest_22)
+combined_SR_85 <- cbind(largest_SR_85, smallest_SR_85[,c("PROV","SR_85")])
+combined_SR_85
+### Time series
+teruel <- c(
+  mf_12[mf_12$PROV == "Teruel", "SR_85"][[1]],
+  mf_14[mf_14$PROV == "Teruel", "SR_85"][[1]],
+  mf_16[mf_16$PROV == "Teruel", "SR_85"][[1]],
+  mf_18[mf_18$PROV == "Teruel", "SR_85"][[1]],
+  mf_20[mf_20$PROV == "Teruel", "SR_85"][[1]],
+  mf_22[mf_22$PROV == "Teruel", "SR_85"][[1]]
+)
+alava <- c(
+  mf_12[mf_12$PROV == "Alava", "SR_85"][[1]],
+  mf_14[mf_14$PROV == "Alava", "SR_85"][[1]],
+  mf_16[mf_16$PROV == "Alava", "SR_85"][[1]],
+  mf_18[mf_18$PROV == "Alava", "SR_85"][[1]],
+  mf_20[mf_20$PROV == "Alava", "SR_85"][[1]],
+  mf_22[mf_22$PROV == "Alava", "SR_85"][[1]]
+)
+cuenca <- c(
+  mf_12[mf_12$PROV == "Cuenca", "SR_85"][[1]],
+  mf_14[mf_14$PROV == "Cuenca", "SR_85"][[1]],
+  mf_16[mf_16$PROV == "Cuenca", "SR_85"][[1]],
+  mf_18[mf_18$PROV == "Cuenca", "SR_85"][[1]],
+  mf_20[mf_20$PROV == "Cuenca", "SR_85"][[1]],
+  mf_22[mf_22$PROV == "Cuenca", "SR_85"][[1]]
+)
+melilla <- c(
+  mf_12[mf_12$PROV == "Melilla", "SR_85"][[1]],
+  mf_14[mf_14$PROV == "Melilla", "SR_85"][[1]],
+  mf_16[mf_16$PROV == "Melilla", "SR_85"][[1]],
+  mf_18[mf_18$PROV == "Melilla", "SR_85"][[1]],
+  mf_20[mf_20$PROV == "Melilla", "SR_85"][[1]],
+  mf_22[mf_22$PROV == "Melilla", "SR_85"][[1]]
+)
+gipuzkoa <- c(
+  mf_12[mf_12$PROV == "Gipuzkoa", "SR_85"][[1]],
+  mf_14[mf_14$PROV == "Gipuzkoa", "SR_85"][[1]],
+  mf_16[mf_16$PROV == "Gipuzkoa", "SR_85"][[1]],
+  mf_18[mf_18$PROV == "Gipuzkoa", "SR_85"][[1]],
+  mf_20[mf_20$PROV == "Gipuzkoa", "SR_85"][[1]],
+  mf_22[mf_22$PROV == "Gipuzkoa", "SR_85"][[1]]
+)
+sevilla <- c(
+  mf_12[mf_12$PROV == "Sevilla", "SR_85"][[1]],
+  mf_14[mf_14$PROV == "Sevilla", "SR_85"][[1]],
+  mf_16[mf_16$PROV == "Sevilla", "SR_85"][[1]],
+  mf_18[mf_18$PROV == "Sevilla", "SR_85"][[1]],
+  mf_20[mf_20$PROV == "Sevilla", "SR_85"][[1]],
+  mf_22[mf_22$PROV == "Sevilla", "SR_85"][[1]]
+)
+data_short <- data.frame(
+  Year = c(2012, 2014, 2016, 2018, 2020, 2022),
+  Teruel = teruel,
+  Alava = alava,
+  Cuenca = cuenca,
+  Melilla = melilla,
+  Gipuzkoa = gipuzkoa,
+  Sevilla = sevilla
+)
+# TIME SERIES
+data_long <- gather(data_short, key = "Province", value = "LocationIndex", -Year)
+ggplot(data_long, aes(x = Year, y = LocationIndex, color = Province, group = Province)) +
+  geom_line(linewidth = 1) +
+  geom_point(linewidth = 2) +
+  scale_x_continuous(
+    breaks = c(2012, 2014, 2016, 2018, 2020, 2022)
+  ) +
+  labs(title = NULL,
+       x = "Year",
+       y = "SR (>85)",
+       color = "Province")+
+  theme_minimal()+
+  theme(
+    legend.text = element_text(size = 18),  
+    legend.title = element_text(size = 18)    
+  )
+
+########################################################
+# SEX RATIO FOR CENTENARIANS (PROVINCES)
+########################################################
+
+### 2012
+plot_SR100_12 <- ggplot(provs_12) +
+  geom_sf(aes(fill = SR_100), alpha = 0.9, color=NA) +
+  scale_fill_gradientn(
+    colors = hcl.colors(100, "Red-Green"),
+    breaks = breaks_100,
+    limits = limits_100,
+    labels = scales::label_comma(),
+    guide = guide_legend()
+  ) +
+  labs(
+    fill = "SR (>100)",
+    title = "2012"
+  ) +
+  theme_void() +
+  theme(
+    plot.background = element_rect("grey80"),
+    text = element_text(face = "bold"),
+    plot.title = element_text(hjust = .5),
+    plot.subtitle = element_text(hjust = .5)
+  )
+### 2014
+plot_SR100_14 <- ggplot(provs_14) +
+  geom_sf(aes(fill = SR_100), alpha = 0.9, color=NA) +
+  scale_fill_gradientn(
+    colors = hcl.colors(100, "Red-Green"),
+    breaks = breaks_100,
+    limits = limits_100,
+    labels = scales::label_comma(),
+    guide = guide_legend()
+  ) +
+  labs(
+    fill = "SR (>100)",
+    title = "2014"
+  ) +
+  theme_void() +
+  theme(
+    plot.background = element_rect("grey80"),
+    text = element_text(face = "bold"),
+    plot.title = element_text(hjust = .5),
+    plot.subtitle = element_text(hjust = .5)
+  )
+### 2016
+plot_SR100_16 <- ggplot(provs_16) +
+  geom_sf(aes(fill = SR_100), alpha = 0.9, color=NA) +
+  scale_fill_gradientn(
+    colors = hcl.colors(100, "Red-Green"),
+    breaks = breaks_100,
+    limits = limits_100,
+    labels = scales::label_comma(),
+    guide = guide_legend()
+  ) +
+  labs(
+    fill = "SR (>100)",
+    title = "2016"
+  ) +
+  theme_void() +
+  theme(
+    plot.background = element_rect("grey80"),
+    text = element_text(face = "bold"),
+    plot.title = element_text(hjust = .5),
+    plot.subtitle = element_text(hjust = .5)
+  )
+### 2018
+plot_SR100_18 <- ggplot(provs_18) +
+  geom_sf(aes(fill = SR_100), alpha = 0.9, color=NA) +
+  scale_fill_gradientn(
+    colors = hcl.colors(100, "Red-Green"),
+    breaks = breaks_100,
+    limits = limits_100,
+    labels = scales::label_comma(),
+    guide = guide_legend()
+  ) +
+  labs(
+    fill = "SR (>100)",
+    title = "2018"
+  ) +
+  theme_void() +
+  theme(
+    plot.background = element_rect("grey80"),
+    text = element_text(face = "bold"),
+    plot.title = element_text(hjust = .5),
+    plot.subtitle = element_text(hjust = .5)
+  )
+### 2020
+plot_SR100_20 <- ggplot(provs_20) +
+  geom_sf(aes(fill = SR_100), alpha = 0.9, color=NA) +
+  scale_fill_gradientn(
+    colors = hcl.colors(100, "Red-Green"),
+    breaks = breaks_100,
+    limits = limits_100,
+    labels = scales::label_comma(),
+    guide = guide_legend()
+  ) +
+  labs(
+    fill = "SR (>100)",
+    title = "2020"
+  ) +
+  theme_void() +
+  theme(
+    plot.background = element_rect("grey80"),
+    text = element_text(face = "bold"),
+    plot.title = element_text(hjust = .5),
+    plot.subtitle = element_text(hjust = .5)
+  )
+### 2022
+plot_SR100_22 <- ggplot(provs_22) +
+  geom_sf(aes(fill = SR_100), alpha = 0.9, color=NA) +
+  scale_fill_gradientn(
+    colors = hcl.colors(100, "Red-Green"),
+    breaks = breaks_100,
+    limits = limits_100,
+    labels = scales::label_comma(),
+    guide = guide_legend()
+  ) +
+  labs(
+    fill = "SR (>100)",
+    title = "2022"
+  ) +
+  theme_void() +
+  theme(
+    plot.background = element_rect("grey80"),
+    text = element_text(face = "bold"),
+    plot.title = element_text(hjust = .5),
+    plot.subtitle = element_text(hjust = .5)
+  )
+# Combine all the plots
+grid.arrange( plot_SR100_12, plot_SR100_14, plot_SR100_16, plot_SR100_18, plot_SR100_20, plot_SR100_22, nrow = 3, ncol = 2, 
+             widths = unit(c(8,8), "cm"),
+             heights = unit(c(5, 5, 5), "cm"))
+### Tables
+wanted_cols <- c("year","PROV", "SR_100")
+# 2012
+# Order by SR_100 to get the smallest values
+mf_12_sorted_asc <- mf_12[order(mf_12$SR_100), ]
+# Extract the 3 smallest values
+smallest_12 <- head(mf_12_sorted_asc[,wanted_cols], 3)
+# Order by SR_100 to get the largest values
+mf_12_sorted_desc <- mf_12[order(mf_12$SR_100, decreasing = TRUE), ]
+# Extract the 3 largest values
+largest_12 <- head(mf_12_sorted_desc[,wanted_cols], 3)
+# 2014
+mf_14_sorted_asc <- mf_14[order(mf_14$SR_100), ]
+smallest_14 <- head(mf_14_sorted_asc[,wanted_cols], 3)
+mf_14_sorted_desc <- mf_14[order(mf_14$SR_100, decreasing = TRUE), ]
+largest_14 <- head(mf_14_sorted_desc[,wanted_cols], 3)
+# 2016
+mf_16_sorted_asc <- mf_16[order(mf_16$SR_100), ]
+smallest_16 <- head(mf_16_sorted_asc[,wanted_cols], 3)
+mf_16_sorted_desc <- mf_16[order(mf_16$SR_100, decreasing = TRUE), ]
+largest_16 <- head(mf_16_sorted_desc[,wanted_cols], 3)
+# 2018
+mf_18_sorted_asc <- mf_18[order(mf_18$SR_100), ]
+smallest_18 <- head(mf_18_sorted_asc[,wanted_cols], 3)
+mf_18_sorted_desc <- mf_18[order(mf_18$SR_100, decreasing = TRUE), ]
+largest_18 <- head(mf_18_sorted_desc[,wanted_cols], 3)
+# 2020
+mf_20_sorted_asc <- mf_20[order(mf_20$SR_100), ]
+smallest_20 <- head(mf_20_sorted_asc[,wanted_cols], 3)
+mf_20_sorted_desc <- mf_20[order(mf_20$SR_100, decreasing = TRUE), ]
+largest_20 <- head(mf_20_sorted_desc[,wanted_cols], 3)
+# 2022
+mf_22_sorted_asc <- mf_22[order(mf_22$SR_100), ]
+smallest_22 <- head(mf_22_sorted_asc[,wanted_cols], 3)
+mf_22_sorted_desc <- mf_22[order(mf_22$SR_100, decreasing = TRUE), ]
+largest_22 <- head(mf_22_sorted_desc[,wanted_cols], 3)
+# Combination
+smallest_SR_100 <- rbind(smallest_12,smallest_14,smallest_16,
+                     smallest_18,smallest_20,smallest_22)
+largest_SR_100 <- rbind(largest_12,largest_14,largest_16,largest_18,
+                     largest_20,largest_22)
+combined_SR_100 <- cbind(largest_SR_100, smallest_SR_100[,c("PROV","SR_100")])
+combined_SR_100
+
+### Time series
+tenerife <- c(
+  mf_12[mf_12$PROV == "Tenerife", "SR_100"][[1]],
+  mf_14[mf_14$PROV == "Tenerife", "SR_100"][[1]],
+  mf_16[mf_16$PROV == "Tenerife", "SR_100"][[1]],
+  mf_18[mf_18$PROV == "Tenerife", "SR_100"][[1]],
+  mf_20[mf_20$PROV == "Tenerife", "SR_100"][[1]],
+  mf_22[mf_22$PROV == "Tenerife", "SR_100"][[1]]
+)
+alava <- c(
+  mf_12[mf_12$PROV == "Alava", "SR_100"][[1]],
+  mf_14[mf_14$PROV == "Alava", "SR_100"][[1]],
+  mf_16[mf_16$PROV == "Alava", "SR_100"][[1]],
+  mf_18[mf_18$PROV == "Alava", "SR_100"][[1]],
+  mf_20[mf_20$PROV == "Alava", "SR_100"][[1]],
+  mf_22[mf_22$PROV == "Alava", "SR_100"][[1]]
+)
+gipuzkoa <- c(
+  mf_12[mf_12$PROV == "Gipuzkoa", "SR_100"][[1]],
+  mf_14[mf_14$PROV == "Gipuzkoa", "SR_100"][[1]],
+  mf_16[mf_16$PROV == "Gipuzkoa", "SR_100"][[1]],
+  mf_18[mf_18$PROV == "Gipuzkoa", "SR_100"][[1]],
+  mf_20[mf_20$PROV == "Gipuzkoa", "SR_100"][[1]],
+  mf_22[mf_22$PROV == "Gipuzkoa", "SR_100"][[1]]
+)
+melilla <- c(
+  mf_12[mf_12$PROV == "Melilla", "SR_100"][[1]],
+  mf_14[mf_14$PROV == "Melilla", "SR_100"][[1]],
+  mf_16[mf_16$PROV == "Melilla", "SR_100"][[1]],
+  mf_18[mf_18$PROV == "Melilla", "SR_100"][[1]],
+  mf_20[mf_20$PROV == "Melilla", "SR_100"][[1]],
+  mf_22[mf_22$PROV == "Melilla", "SR_100"][[1]]
+)
+bizkaia <- c(
+  mf_12[mf_12$PROV == "Bizkaia", "SR_100"][[1]],
+  mf_14[mf_14$PROV == "Bizkaia", "SR_100"][[1]],
+  mf_16[mf_16$PROV == "Bizkaia", "SR_100"][[1]],
+  mf_18[mf_18$PROV == "Bizkaia", "SR_100"][[1]],
+  mf_20[mf_20$PROV == "Bizkaia", "SR_100"][[1]],
+  mf_22[mf_22$PROV == "Bizkaia", "SR_100"][[1]]
+)
+valladolid <- c(
+  mf_12[mf_12$PROV == "Valladolid", "SR_100"][[1]],
+  mf_14[mf_14$PROV == "Valladolid", "SR_100"][[1]],
+  mf_16[mf_16$PROV == "Valladolid", "SR_100"][[1]],
+  mf_18[mf_18$PROV == "Valladolid", "SR_100"][[1]],
+  mf_20[mf_20$PROV == "Valladolid", "SR_100"][[1]],
+  mf_22[mf_22$PROV == "Valladolid", "SR_100"][[1]]
+)
+data_short <- data.frame(
+  Year = c(2012, 2014, 2016, 2018, 2020, 2022),
+  Tenerife = tenerife,
+  Alava = alava,
+  Bizkaia = bizkaia,
+  Melilla = melilla,
+  Gipuzkoa = gipuzkoa,
+  Valladolid = valladolid
+)
+# TIME SERIES
+data_long <- gather(data_short, key = "Province", value = "LocationIndex", -Year)
+ggplot(data_long, aes(x = Year, y = LocationIndex, color = Province, group = Province)) +
+  geom_line(linewidth = 1) +
+  geom_point(linewidth = 2) +
+  scale_x_continuous(
+    breaks = c(2012, 2014, 2016, 2018, 2020, 2022)
+  ) +
+  labs(title = NULL,
+       x = "Year",
+       y = "SR (>100)",
+       color = "Province") +
+  theme_minimal()+
+  theme(
+    legend.text = element_text(size = 18),  
+    legend.title = element_text(size = 18)    
+  )
