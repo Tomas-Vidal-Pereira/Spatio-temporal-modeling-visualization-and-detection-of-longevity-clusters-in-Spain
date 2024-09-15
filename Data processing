@@ -3318,3 +3318,1217 @@ ggplot(data_long, aes(x = Year, y = LocationIndex, color = Municipality, group =
     legend.text = element_text(size = 18),    # Increase the legend text size
     legend.title = element_text(size = 18)    # Increase the legend title size
   )
+
+##############################################################
+# LOCATION INDEX OF THE CENTENARIAN POPULATION (PROVINCES)
+##############################################################
+# Summarize total inhabitants by province and Year
+habs_prov <- data %>%
+  group_by(PROV, year) %>%
+  summarize(total = sum(Total_habs),
+            older_65 = sum(Total_65),
+            older_85 = sum(Total_85),
+            older_100 = sum(Total_100))
+# Print the resulting dataframe
+print(habs_prov)
+# Compute IL for every year
+# 2012
+prov_12 <- habs_prov[habs_prov$year==2012,]
+total_C12 <- sum(prov_12$older_100)
+total12 <- sum(prov_12$total)
+prov_12$IL <- (prov_12$older_100/total_C12)/(prov_12$total/total12)
+# 2014
+prov_14 <- habs_prov[habs_prov$year==2014,]
+total_C14 <- sum(prov_14$older_100)
+total14 <- sum(prov_14$total)
+prov_14$IL <- (prov_14$older_100/total_C14)/(prov_14$total/total14)
+# 2016
+prov_16 <- habs_prov[habs_prov$year==2016,]
+total_C16 <- sum(prov_16$older_100)
+total16 <- sum(prov_16$total)
+prov_16$IL <- (prov_16$older_100/total_C16)/(prov_16$total/total16)
+# 2018
+prov_18 <- habs_prov[habs_prov$year==2018,]
+total_C18 <- sum(prov_18$older_100)
+total18 <- sum(prov_18$total)
+prov_18$IL <- (prov_18$older_100/total_C18)/(prov_18$total/total18)
+# 2020
+prov_20 <- habs_prov[habs_prov$year==2020,]
+total_C20 <- sum(prov_20$older_100)
+total20 <- sum(prov_20$total)
+prov_20$IL <- (prov_20$older_100/total_C20)/(prov_20$total/total20)
+# 2022
+prov_22 <- habs_prov[habs_prov$year==2022,]
+total_C22 <- sum(prov_22$older_100)
+total22 <- sum(prov_22$total)
+prov_22$IL <- (prov_22$older_100/total_C22)/(prov_22$total/total22)
+min_il <- min(c(min(prov_12$IL), min(prov_14$IL),
+                min(prov_16$IL), min(prov_18$IL),
+                min(prov_20$IL), min(prov_22$IL)))
+
+max_il <- max(c(max(prov_12$IL), max(prov_14$IL),
+                max(prov_16$IL), max(prov_18$IL),
+                max(prov_20$IL), max(prov_22$IL)))
+
+# We define the limits that we will use in the next plots
+limits <- c(min_il, max_il)
+breaks <- limits[1] + c(0, 0.25*(limits[2]-limits[1]),
+            0.5*(limits[2]-limits[1]),
+            0.75*(limits[2]-limits[1]),limits[2]-limits[1])
+### 2012
+provs_12 <- provs_12 %>%
+  left_join(prov_12, by = c("ine.prov.name"="PROV"))
+plot_IL_12 <- ggplot(provs_12) +
+  geom_sf(aes(fill = IL), alpha =1, color = NA) +
+  scale_fill_gradientn(
+    colors = hcl.colors(100, "Red-Green"),
+    breaks = breaks,
+    limits = limits,
+    labels = scales::label_comma(),
+    guide = guide_legend()
+  ) +
+  labs(
+    fill = "IL",
+    title = "2012"
+  ) +
+  theme_void() +
+  theme(
+    plot.background = element_rect("grey80"),
+    text = element_text(face = "bold"),
+    plot.title = element_text(hjust = .5),
+    plot.subtitle = element_text(hjust = .5)
+  )
+### 2014
+provs_14 <- provs_14 %>%
+  left_join(prov_14, by = c("ine.prov.name"="PROV"))
+plot_IL_14 <- ggplot(provs_14) +
+  geom_sf(aes(fill = IL), alpha = 0.9, color = NA) +
+  scale_fill_gradientn(
+    colors = hcl.colors(100, "Red-Green"),
+    breaks = breaks,
+    limits = limits,
+    labels = scales::label_comma(),
+    guide = guide_legend()
+  ) +
+  labs(
+    fill = "IL",
+    title = "2014"
+  ) +
+  theme_void() +
+  theme(
+    plot.background = element_rect("grey80"),
+    text = element_text(face = "bold"),
+    plot.title = element_text(hjust = .5),
+    plot.subtitle = element_text(hjust = .5)
+  )
+### 2016
+provs_16 <- provs_16 %>%
+  left_join(prov_16, by = c("ine.prov.name"="PROV"))
+plot_IL_16 <- ggplot(provs_16) +
+  geom_sf(aes(fill = IL), alpha = 0.9, color = NA) +
+  scale_fill_gradientn(
+    colors = hcl.colors(100, "Red-Green"),
+    breaks = breaks,
+    limits = limits,
+    labels = scales::label_comma(),
+    guide = guide_legend()
+  ) +
+  labs(
+    fill = "IL",
+    title = "2016"
+  ) +
+  theme_void() +
+  theme(
+    plot.background = element_rect("grey80"),
+    text = element_text(face = "bold"),
+    plot.title = element_text(hjust = .5),
+    plot.subtitle = element_text(hjust = .5)
+  )
+### 2018
+provs_18 <- provs_18 %>%
+  left_join(prov_18, by = c("ine.prov.name"="PROV"))
+plot_IL_18 <- ggplot(provs_18) +
+  geom_sf(aes(fill = IL), alpha = 0.9, color = NA) +
+  scale_fill_gradientn(
+    colors = hcl.colors(100, "Red-Green"),
+    breaks = breaks,
+    limits = limits,
+    labels = scales::label_comma(),
+    guide = guide_legend()
+  ) +
+  labs(
+    fill = "IL",
+    title = "2018"
+  ) +
+  theme_void() +
+  theme(
+    plot.background = element_rect("grey80"),
+    text = element_text(face = "bold"),
+    plot.title = element_text(hjust = .5),
+    plot.subtitle = element_text(hjust = .5)
+  )
+### 2020
+provs_20 <- provs_20 %>%
+  left_join(prov_20, by = c("ine.prov.name"="PROV"))
+plot_IL_20 <- ggplot(provs_20) +
+  geom_sf(aes(fill = IL), alpha = 0.9, color = NA) +
+  scale_fill_gradientn(
+    colors = hcl.colors(100, "Red-Green"),
+    breaks = breaks,
+    limits = limits,
+    labels = scales::label_comma(),
+    guide = guide_legend()
+  ) +
+  labs(
+    fill = "IL",
+    title = "2020"
+  ) +
+  theme_void() +
+  theme(
+    plot.background = element_rect("grey80"),
+    text = element_text(face = "bold"),
+    plot.title = element_text(hjust = .5),
+    plot.subtitle = element_text(hjust = .5)
+  )
+### 2022
+provs_22 <- provs_22 %>%
+  left_join(prov_22, by = c("ine.prov.name"="PROV"))
+plot_IL_22 <- ggplot(provs_22) +
+  geom_sf(aes(fill = IL), alpha = 0.9, color = NA) +
+  scale_fill_gradientn(
+    colors = hcl.colors(100, "Red-Green"),
+    breaks = breaks,
+    limits = limits,
+    labels = scales::label_comma(),
+    guide = guide_legend()
+  ) +
+  labs(
+    fill = "IL",
+    title = "2022"
+  ) +
+  theme_void() +
+  theme(
+    plot.background = element_rect("grey80"),
+    text = element_text(face = "bold"),
+    plot.title = element_text(hjust = .5),
+    plot.subtitle = element_text(hjust = .5)
+  )
+# Combine all the plots
+grid.arrange( plot_IL_12, plot_IL_14, plot_IL_16, plot_IL_18, plot_IL_20, plot_IL_22, nrow = 3, ncol = 2, 
+             widths = unit(c(8,8), "cm"),
+             heights = unit(c(5, 5, 5), "cm"))
+### Tables 
+wanted_cols <- c("year","PROV", "IL")
+# 2012
+# Order by IL to get the smallest values
+prov_12_sorted_asc <- prov_12[order(prov_12$IL), ]
+# Extract the 3 smallest values
+smallest_12 <- head(prov_12_sorted_asc[,wanted_cols], 3)
+# Order by IL to get the largest values
+prov_12_sorted_desc <- prov_12[order(prov_12$IL, decreasing = TRUE), ]
+# Extract the 3 largest values
+largest_12 <- head(prov_12_sorted_desc[,wanted_cols], 3)
+# 2014
+prov_14_sorted_asc <- prov_14[order(prov_14$IL), ]
+smallest_14 <- head(prov_14_sorted_asc[,wanted_cols], 3)
+prov_14_sorted_desc <- prov_14[order(prov_14$IL, decreasing = TRUE), ]
+largest_14 <- head(prov_14_sorted_desc[,wanted_cols], 3)
+# 2016
+prov_16_sorted_asc <- prov_16[order(prov_16$IL), ]
+smallest_16 <- head(prov_16_sorted_asc[,wanted_cols], 3)
+prov_16_sorted_desc <- prov_16[order(prov_16$IL, decreasing = TRUE), ]
+largest_16 <- head(prov_16_sorted_desc[,wanted_cols], 3)
+# 2018
+prov_18_sorted_asc <- prov_18[order(prov_18$IL), ]
+smallest_18 <- head(prov_18_sorted_asc[,wanted_cols], 3)
+prov_18_sorted_desc <- prov_18[order(prov_18$IL, decreasing = TRUE), ]
+largest_18 <- head(prov_18_sorted_desc[,wanted_cols], 3)
+# 2020
+prov_20_sorted_asc <- prov_20[order(prov_20$IL), ]
+smallest_20 <- head(prov_20_sorted_asc[,wanted_cols], 3)
+prov_20_sorted_desc <- prov_20[order(prov_20$IL, decreasing = TRUE), ]
+largest_20 <- head(prov_20_sorted_desc[,wanted_cols], 3)
+# 2022
+prov_22_sorted_asc <- prov_22[order(prov_22$IL), ]
+smallest_22 <- head(prov_22_sorted_asc[,wanted_cols], 3)
+prov_22_sorted_desc <- prov_22[order(prov_22$IL, decreasing = TRUE), ]
+largest_22 <- head(prov_22_sorted_desc[,wanted_cols], 3)
+# Combination
+smallest_IL <- rbind(smallest_12,smallest_14,smallest_16,
+                     smallest_18,smallest_20,smallest_22)
+largest_IL <- rbind(largest_12,largest_14,largest_16,largest_18,
+                     largest_20,largest_22)
+combined_IL <- cbind(largest_IL, smallest_IL[,c("PROV","IL")])
+combined_IL
+### Time series
+ourense <- c(
+  prov_12[prov_12$PROV == "Ourense", "IL"][[1]],
+  prov_14[prov_14$PROV == "Ourense", "IL"][[1]],
+  prov_16[prov_16$PROV == "Ourense", "IL"][[1]],
+  prov_18[prov_18$PROV == "Ourense", "IL"][[1]],
+  prov_20[prov_20$PROV == "Ourense", "IL"][[1]],
+  prov_22[prov_22$PROV == "Ourense", "IL"][[1]]
+)
+soria <- c(
+  prov_12[prov_12$PROV == "Soria", "IL"][[1]],
+  prov_14[prov_14$PROV == "Soria", "IL"][[1]],
+  prov_16[prov_16$PROV == "Soria", "IL"][[1]],
+  prov_18[prov_18$PROV == "Soria", "IL"][[1]],
+  prov_20[prov_20$PROV == "Soria", "IL"][[1]],
+  prov_22[prov_22$PROV == "Soria", "IL"][[1]]
+)
+
+salamanca <- c(
+  prov_12[prov_12$PROV == "Salamanca", "IL"][[1]],
+  prov_14[prov_14$PROV == "Salamanca", "IL"][[1]],
+  prov_16[prov_16$PROV == "Salamanca", "IL"][[1]],
+  prov_18[prov_18$PROV == "Salamanca", "IL"][[1]],
+  prov_20[prov_20$PROV == "Salamanca", "IL"][[1]],
+  prov_22[prov_22$PROV == "Salamanca", "IL"][[1]]
+)
+cadiz <- c(
+  prov_12[prov_12$PROV=="Cadiz","IL"][[1]], 
+  prov_14[prov_14$PROV=="Cadiz","IL"][[1]], 
+  prov_16[prov_16$PROV=="Cadiz","IL"][[1]], 
+  prov_18[prov_18$PROV=="Cadiz","IL"][[1]], 
+  prov_20[prov_20$PROV=="Cadiz","IL"][[1]], 
+  prov_22[prov_22$PROV=="Cadiz","IL"][[1]]
+  )
+ceuta <- c(
+  prov_12[prov_12$PROV=="Ceuta","IL"][[1]], 
+  prov_14[prov_14$PROV=="Ceuta","IL"][[1]], 
+  prov_16[prov_16$PROV=="Ceuta","IL"][[1]], 
+  prov_18[prov_18$PROV=="Ceuta","IL"][[1]], 
+  prov_20[prov_20$PROV=="Ceuta","IL"][[1]], 
+  prov_22[prov_22$PROV=="Ceuta","IL"][[1]]
+  )
+melilla <- c(
+  prov_12[prov_12$PROV=="Melilla","IL"][[1]], 
+  prov_14[prov_14$PROV=="Melilla","IL"][[1]], 
+  prov_16[prov_16$PROV=="Melilla","IL"][[1]], 
+  prov_18[prov_18$PROV=="Melilla","IL"][[1]], 
+  prov_20[prov_20$PROV=="Melilla","IL"][[1]], 
+  prov_22[prov_22$PROV=="Melilla","IL"][[1]]
+  )
+data_short <- data.frame(
+  Year = c(2012, 2014, 2016, 2018, 2020, 2022),
+  Ourense = ourense,
+  Soria = soria,
+  Salamanca = salamanca,
+  Cadiz = cadiz,
+  Ceuta = ceuta,
+  Melilla = melilla
+)
+# TIME SERIES
+data_long <- gather(data_short, key = "Province", value = "LocationIndex", -Year)
+ggplot(data_long, aes(x = Year, y = LocationIndex, color = Province, group = Province)) +
+  geom_line(linewidth = 1) +
+  geom_point(linewidth = 2) +
+  scale_x_continuous(
+    breaks = c(2012, 2014, 2016, 2018, 2020, 2022)
+  ) +
+  labs(title = NULL,
+       x = "Year",
+       y = "IL",
+       color = "Province")  +
+  theme_minimal()+
+  theme(
+    legend.text = element_text(size = 18),  
+    legend.title = element_text(size = 18)    
+  )
+
+############################################################################
+# LOCATION INDEX OF THE CENTENARIAN POPULATION AGES 65 AND ABOVE (PROVINCES)
+############################################################################
+
+# 2012
+total_S12 <- sum(prov_12$older_65)
+prov_12$IL2 <- (prov_12$older_100/total_C12)/(prov_12$older_65/total_S12)
+# 2014
+total_S14 <- sum(prov_14$older_65)
+prov_14$IL2 <- (prov_14$older_100/total_C14)/(prov_14$older_65/total_S14)
+# 2016
+total_S16 <- sum(prov_16$older_65)
+prov_16$IL2 <- (prov_16$older_100/total_C16)/(prov_16$older_65/total_S16)
+# 2018
+total_S18 <- sum(prov_18$older_65)
+prov_18$IL2 <- (prov_18$older_100/total_C18)/(prov_18$older_65/total_S18)
+# 2020
+total_S20 <- sum(prov_20$older_65)
+prov_20$IL2 <- (prov_20$older_100/total_C20)/(prov_20$older_65/total_S20)
+# 2022
+total_S22 <- sum(prov_22$older_65)
+prov_22$IL2 <- (prov_22$older_100/total_C22)/(prov_22$older_65/total_S22)
+
+min_il2 <- min(c(min(prov_12$IL2), min(prov_14$IL2),
+                min(prov_16$IL2), min(prov_18$IL2),
+                min(prov_20$IL2), min(prov_22$IL2)))
+
+max_il2 <- max(c(max(prov_12$IL2), max(prov_14$IL2),
+                max(prov_16$IL2), max(prov_18$IL2),
+                max(prov_20$IL2), max(prov_22$IL2)))
+
+# We define the limits that we will use in the next plots
+limits2 <- c(min_il2, max_il2)
+breaks2 <- limits2[1]+c(0, 0.25*(limits2[2]-limits2[1]),
+            0.5*(limits2[2]-limits2[1]),
+            0.75*(limits2[2]-limits2[1]),limits2[2]-limits2[1])
+### 2012
+provs_12 <- provs_12 %>%
+  left_join(prov_12[,c("IL2","PROV")],
+            by = c("ine.prov.name"="PROV"))
+
+plot_IL2_12 <- ggplot(provs_12) +
+  geom_sf(aes(fill = IL2), alpha = 0.9, color = NA) +
+  scale_fill_gradientn(
+    colors = hcl.colors(100, "Red-Green"),
+    breaks = breaks2,
+    limits = limits2,
+    labels = scales::label_comma(),
+    guide = guide_legend()
+  ) +
+  labs(
+    fill = "IL(>65)",
+    title = "2012"
+  ) +
+  theme_void() +
+  theme(
+    plot.background = element_rect("grey80"),
+    text = element_text(face = "bold"),
+    plot.title = element_text(hjust = .5),
+    plot.subtitle = element_text(hjust = .5)
+  )
+### 2014
+provs_14 <- provs_14 %>%
+  left_join(prov_14[,c("IL2","PROV")], 
+            by = c("ine.prov.name"="PROV"))
+
+plot_IL2_14 <- ggplot(provs_14) +
+  geom_sf(aes(fill = IL2), alpha = 0.9, color = NA) +
+  scale_fill_gradientn(
+    colors = hcl.colors(100, "Red-Green"),
+    breaks = breaks2,
+    limits = limits2,
+    labels = scales::label_comma(),
+    guide = guide_legend()
+  ) +
+  labs(
+    fill = "IL(>65)",
+    title = "2014"
+  ) +
+  theme_void() +
+  theme(
+    plot.background = element_rect("grey80"),
+    text = element_text(face = "bold"),
+    plot.title = element_text(hjust = .5),
+    plot.subtitle = element_text(hjust = .5)
+  )
+### 2016
+# Plot IL2 2016
+provs_16 <- provs_16 %>%
+  left_join(prov_16[,c("IL2","PROV")], 
+            by = c("ine.prov.name"="PROV"))
+
+plot_IL2_16 <- ggplot(provs_16) +
+  geom_sf(aes(fill = IL2), alpha = 0.9, color = NA) +
+  scale_fill_gradientn(
+    colors = hcl.colors(100, "Red-Green"),
+    breaks = breaks2,
+    limits = limits2,
+    labels = scales::label_comma(),
+    guide = guide_legend()
+  ) +
+  labs(
+    fill = "IL(>65)",
+    title = "2016"
+  ) +
+  theme_void() +
+  theme(
+    plot.background = element_rect("grey80"),
+    text = element_text(face = "bold"),
+    plot.title = element_text(hjust = .5),
+    plot.subtitle = element_text(hjust = .5)
+  )
+### 2018
+# Plot IL2 2018
+provs_18 <- provs_18 %>%
+  left_join(prov_18[,c("IL2","PROV")],
+            by = c("ine.prov.name"="PROV"))
+
+plot_IL2_18 <- ggplot(provs_18) +
+  geom_sf(aes(fill = IL2), alpha = 0.9, color = NA) +
+  scale_fill_gradientn(
+    colors = hcl.colors(100, "Red-Green"),
+    breaks = breaks2,
+    limits = limits2,
+    labels = scales::label_comma(),
+    guide = guide_legend()
+  ) +
+  labs(
+    fill = "IL(>65)",
+    title = "2018"
+  ) +
+  theme_void() +
+  theme(
+    plot.background = element_rect("grey80"),
+    text = element_text(face = "bold"),
+    plot.title = element_text(hjust = .5),
+    plot.subtitle = element_text(hjust = .5)
+  )
+# Plot IL2 2020
+provs_20 <- provs_20 %>%
+  left_join(prov_20[,c("IL2","PROV")], 
+            by = c("ine.prov.name"="PROV"))
+
+plot_IL2_20 <- ggplot(provs_20) +
+  geom_sf(aes(fill = IL2), alpha = 0.9, color = NA) +
+  scale_fill_gradientn(
+    colors = hcl.colors(100, "Red-Green"),
+    breaks = breaks2,
+    limits = limits2,
+    labels = scales::label_comma(),
+    guide = guide_legend()
+  ) +
+  labs(
+    fill = "IL(>65)",
+    title = "2020"
+  ) +
+  theme_void() +
+  theme(
+    plot.background = element_rect("grey80"),
+    text = element_text(face = "bold"),
+    plot.title = element_text(hjust = .5),
+    plot.subtitle = element_text(hjust = .5)
+  )
+### 2022
+provs_22 <- provs_22 %>%
+  left_join(prov_22[,c("IL2","PROV")],
+            by = c("ine.prov.name"="PROV"))
+
+plot_IL2_22 <- ggplot(provs_22) +
+  geom_sf(aes(fill = IL2), alpha = 0.9, color = NA) +
+  scale_fill_gradientn(
+    colors = hcl.colors(100, "Red-Green"),
+    breaks = breaks2,
+    limits = limits2,
+    labels = scales::label_comma(),
+    guide = guide_legend()
+  ) +
+  labs(
+    fill = "IL(>65)",
+    title = "2022"
+  ) +
+  theme_void() +
+  theme(
+    plot.background = element_rect("grey80"),
+    text = element_text(face = "bold"),
+    plot.title = element_text(hjust = .5),
+    plot.subtitle = element_text(hjust = .5)
+  )
+# Combine all the plots
+grid.arrange(plot_IL2_12, plot_IL2_14, plot_IL2_16, plot_IL2_18, plot_IL2_20, plot_IL2_22, nrow = 3, ncol = 2, 
+             widths = unit(c(8,8), "cm"),
+             heights = unit(c(5, 5, 5), "cm"))
+### Tables
+wanted_cols <- c("year","PROV","IL2")
+# 2012
+# Order by IL to get the smallest values
+prov_12_sorted_asc <- prov_12[order(prov_12$IL2), ]
+# Extract the 3 smallest values
+smallest_12 <- head(prov_12_sorted_asc[,wanted_cols], 3)
+# Order by IL to get the largest values
+prov_12_sorted_desc <- prov_12[order(prov_12$IL2, decreasing = TRUE), ]
+# Extract the 3 largest values
+largest_12 <- head(prov_12_sorted_desc[,wanted_cols], 3)
+# Repeat the same for the remaining years and combine the dataframes conveniently
+# 2014
+prov_14_sorted_asc <- prov_14[order(prov_14$IL2), ]
+smallest_14 <- head(prov_14_sorted_asc[,wanted_cols], 3)
+prov_14_sorted_desc <- prov_14[order(prov_14$IL2, decreasing = TRUE), ]
+largest_14 <- head(prov_14_sorted_desc[,wanted_cols], 3)
+# 2016
+prov_16_sorted_asc <- prov_16[order(prov_16$IL2), ]
+smallest_16 <- head(prov_16_sorted_asc[,wanted_cols], 3)
+prov_16_sorted_desc <- prov_16[order(prov_16$IL2, decreasing = TRUE), ]
+largest_16 <- head(prov_16_sorted_desc[,wanted_cols], 3)
+# 2018
+prov_18_sorted_asc <- prov_18[order(prov_18$IL2), ]
+smallest_18 <- head(prov_18_sorted_asc[,wanted_cols], 3)
+prov_18_sorted_desc <- prov_18[order(prov_18$IL2, decreasing = TRUE), ]
+largest_18 <- head(prov_18_sorted_desc[,wanted_cols], 3)
+# 2020
+prov_20_sorted_asc <- prov_20[order(prov_20$IL2), ]
+smallest_20 <- head(prov_20_sorted_asc[,wanted_cols], 3)
+prov_20_sorted_desc <- prov_20[order(prov_20$IL2, decreasing = TRUE), ]
+largest_20 <- head(prov_20_sorted_desc[,wanted_cols], 3)
+# 2022
+prov_22_sorted_asc <- prov_22[order(prov_22$IL2), ]
+smallest_22 <- head(prov_22_sorted_asc[,wanted_cols], 3)
+prov_22_sorted_desc <- prov_22[order(prov_22$IL2, decreasing = TRUE), ]
+largest_22 <- head(prov_22_sorted_desc[,wanted_cols], 3)
+# Combination
+smallest_IL2 <- rbind(smallest_12,smallest_14,smallest_16,
+                     smallest_18,smallest_20,smallest_22)
+largest_IL2 <- rbind(largest_12,largest_14,largest_16,largest_18,
+                     largest_20,largest_22)
+combined_IL2 <- cbind(largest_IL2, smallest_IL2[,c("PROV","IL2")])
+combined_IL2
+### Time series
+ourense <- c(
+  prov_12[prov_12$PROV == "Ourense", "IL2"][[1]],
+  prov_14[prov_14$PROV == "Ourense", "IL2"][[1]],
+  prov_16[prov_16$PROV == "Ourense", "IL2"][[1]],
+  prov_18[prov_18$PROV == "Ourense", "IL2"][[1]],
+  prov_20[prov_20$PROV == "Ourense", "IL2"][[1]],
+  prov_22[prov_22$PROV == "Ourense", "IL2"][[1]]
+)
+soria <- c(
+  prov_12[prov_12$PROV == "Soria", "IL2"][[1]],
+  prov_14[prov_14$PROV == "Soria", "IL2"][[1]],
+  prov_16[prov_16$PROV == "Soria", "IL2"][[1]],
+  prov_18[prov_18$PROV == "Soria", "IL2"][[1]],
+  prov_20[prov_20$PROV == "Soria", "IL2"][[1]],
+  prov_22[prov_22$PROV == "Soria", "IL2"][[1]]
+)
+
+salamanca <- c(
+  prov_12[prov_12$PROV == "Salamanca", "IL2"][[1]],
+  prov_14[prov_14$PROV == "Salamanca", "IL2"][[1]],
+  prov_16[prov_16$PROV == "Salamanca", "IL2"][[1]],
+  prov_18[prov_18$PROV == "Salamanca", "IL2"][[1]],
+  prov_20[prov_20$PROV == "Salamanca", "IL2"][[1]],
+  prov_22[prov_22$PROV == "Salamanca", "IL2"][[1]]
+)
+cadiz <- c(
+  prov_12[prov_12$PROV=="Cadiz","IL2"][[1]], 
+  prov_14[prov_14$PROV=="Cadiz","IL2"][[1]], 
+  prov_16[prov_16$PROV=="Cadiz","IL2"][[1]], 
+  prov_18[prov_18$PROV=="Cadiz","IL2"][[1]], 
+  prov_20[prov_20$PROV=="Cadiz","IL2"][[1]], 
+  prov_22[prov_22$PROV=="Cadiz","IL2"][[1]]
+  )
+murcia <- c(
+  prov_12[prov_12$PROV=="Murcia","IL2"][[1]], 
+  prov_14[prov_14$PROV=="Murcia","IL2"][[1]], 
+  prov_16[prov_16$PROV=="Murcia","IL2"][[1]], 
+  prov_18[prov_18$PROV=="Murcia","IL2"][[1]], 
+  prov_20[prov_20$PROV=="Murcia","IL2"][[1]], 
+  prov_22[prov_22$PROV=="Murcia","IL2"][[1]]
+  )
+badajoz <- c(
+  prov_12[prov_12$PROV=="Badajoz","IL2"][[1]], 
+  prov_14[prov_14$PROV=="Badajoz","IL2"][[1]], 
+  prov_16[prov_16$PROV=="Badajoz","IL2"][[1]], 
+  prov_18[prov_18$PROV=="Badajoz","IL2"][[1]], 
+  prov_20[prov_20$PROV=="Badajoz","IL2"][[1]], 
+  prov_22[prov_22$PROV=="Badajoz","IL2"][[1]]
+  )
+data_short <- data.frame(
+  Year = c(2012, 2014, 2016, 2018, 2020, 2022),
+  Ourense = ourense,
+  Soria = soria,
+  Salamanca = salamanca,
+  Cadiz = cadiz,
+  Badajoz = badajoz,
+  Murcia = murcia
+)
+data_long <- gather(data_short, key = "Province", value = "LocationIndex", -Year)
+ggplot(data_long, aes(x = Year, y = LocationIndex, color = Province, group = Province)) +
+  geom_line(linewidth = 1) +
+  geom_point(linewidth = 2) +
+  scale_x_continuous(
+    breaks = c(2012, 2014, 2016, 2018, 2020, 2022)
+  ) +
+  labs(title = NULL,
+       x = "Year",
+       y = "IL (>65)",
+       color = "Province") +
+  theme_minimal()+
+  theme(
+    legend.text = element_text(size = 18),  
+    legend.title = element_text(size = 18)    
+  )
+
+############################################################################
+# LOCATION INDEX OF THE CENTENARIAN POPULATION AGES 85 AND ABOVE (PROVINCES)
+############################################################################
+
+# 2012
+total_O12 <- sum(prov_12$older_85)
+prov_12$IL3 <- (prov_12$older_100/total_C12)/(prov_12$older_85/total_O12)
+# 2014
+total_O14 <- sum(prov_14$older_85)
+prov_14$IL3 <- (prov_14$older_100/total_C14)/(prov_14$older_85/total_O14)
+# 2016
+total_O16 <- sum(prov_16$older_85)
+prov_16$IL3 <- (prov_16$older_100/total_C16)/(prov_16$older_85/total_O16)
+# 2018
+total_O18 <- sum(prov_18$older_85)
+prov_18$IL3 <- (prov_18$older_100/total_C18)/(prov_18$older_85/total_O18)
+# 2020
+total_O20 <- sum(prov_20$older_85)
+prov_20$IL3 <- (prov_20$older_100/total_C20)/(prov_20$older_85/total_O20)
+# 2022
+total_O22 <- sum(prov_22$older_85)
+prov_22$IL3 <- (prov_22$older_100/total_C22)/(prov_22$older_85/total_O22)
+min_il3 <- min(c(min(prov_12$IL3), min(prov_14$IL3),
+                min(prov_16$IL3), min(prov_18$IL3),
+                min(prov_20$IL3), min(prov_22$IL3)))
+
+max_il3 <- max(c(max(prov_12$IL3), max(prov_14$IL3),
+                max(prov_16$IL3), max(prov_18$IL3),
+                max(prov_20$IL3), max(prov_22$IL3)))
+
+# We define the limits that we will use in the next plots
+limits3 <- c(min_il3, max_il3)
+breaks3 <- limits3[1]+c(0, 0.25*(limits3[2]-limits3[1]),
+            0.5*(limits3[2]-limits3[1]),
+            0.75*(limits3[2]-limits3[1]),limits3[2]-limits3[1])
+### 2012
+provs_12 <- provs_12 %>%
+  left_join(prov_12[,c("IL3","PROV")], 
+            by = c("ine.prov.name"="PROV"))
+
+plot_IL3_12 <- ggplot(provs_12) +
+  geom_sf(aes(fill = IL3), alpha = 0.9, color = NA) +
+  scale_fill_gradientn(
+    colors = hcl.colors(100, "Red-Green"),
+    breaks = breaks3,
+    limits = limits3,
+    labels = scales::label_comma(),
+    guide = guide_legend()
+  ) +
+  labs(
+    fill = "IL(>85)",
+    title = "2012"
+  ) +
+  theme_void() +
+  theme(
+    plot.background = element_rect("grey80"),
+    text = element_text(face = "bold"),
+    plot.title = element_text(hjust = .5),
+    plot.subtitle = element_text(hjust = .5)
+  )
+### 2014
+provs_14 <- provs_14 %>%
+  left_join(prov_14[,c("IL3","PROV")], 
+            by = c("ine.prov.name"="PROV"))
+
+plot_IL3_14 <- ggplot(provs_14) +
+  geom_sf(aes(fill = IL3), alpha = 0.9, color = NA) +
+  scale_fill_gradientn(
+    colors = hcl.colors(100, "Red-Green"),
+    breaks = breaks3,
+    limits = limits3,
+    labels = scales::label_comma(),
+    guide = guide_legend()
+  ) +
+  labs(
+    fill = "IL(>85)",
+    title = "2014"
+  ) +
+  theme_void() +
+  theme(
+    plot.background = element_rect("grey80"),
+    text = element_text(face = "bold"),
+    plot.title = element_text(hjust = .5),
+    plot.subtitle = element_text(hjust = .5)
+  )
+### 2016
+provs_16 <- provs_16 %>%
+  left_join(prov_16[,c("IL3","PROV")], 
+            by = c("ine.prov.name"="PROV"))
+
+plot_IL3_16 <- ggplot(provs_16) +
+  geom_sf(aes(fill = IL3), alpha = 0.9, color = NA) +
+  scale_fill_gradientn(
+    colors = hcl.colors(100, "Red-Green"),
+    breaks = breaks3,
+    limits = limits3,
+    labels = scales::label_comma(),
+    guide = guide_legend()
+  ) +
+  labs(
+    fill = "IL(>85)",
+    title = "2016"
+  ) +
+  theme_void() +
+  theme(
+    plot.background = element_rect("grey80"),
+    text = element_text(face = "bold"),
+    plot.title = element_text(hjust = .5),
+    plot.subtitle = element_text(hjust = .5)
+  )
+### 2018
+provs_18 <- provs_18 %>%
+  left_join(prov_18[,c("IL3","PROV")], 
+            by = c("ine.prov.name"="PROV"))
+
+plot_IL3_18 <- ggplot(provs_18) +
+  geom_sf(aes(fill = IL3), alpha = 0.9, color = NA) +
+  scale_fill_gradientn(
+    colors = hcl.colors(100, "Red-Green"),
+    breaks = breaks3,
+    limits = limits3,
+    labels = scales::label_comma(),
+    guide = guide_legend()
+  ) +
+  labs(
+    fill = "IL(>85)",
+    title = "2018"
+  ) +
+  theme_void() +
+  theme(
+    plot.background = element_rect("grey80"),
+    text = element_text(face = "bold"),
+    plot.title = element_text(hjust = .5),
+    plot.subtitle = element_text(hjust = .5)
+  )
+### 2020
+provs_20 <- provs_20 %>%
+  left_join(prov_20[,c("IL3","PROV")], 
+            by = c("ine.prov.name"="PROV"))
+
+plot_IL3_20 <- ggplot(provs_20) +
+  geom_sf(aes(fill = IL3), alpha = 0.9, color = NA) +
+  scale_fill_gradientn(
+    colors = hcl.colors(100, "Red-Green"),
+    breaks = breaks3,
+    limits = limits3,
+    labels = scales::label_comma(),
+    guide = guide_legend()
+  ) +
+  labs(
+    fill = "IL(>85)",
+    title = "2020"
+  ) +
+  theme_void() +
+  theme(
+    plot.background = element_rect("grey80"),
+    text = element_text(face = "bold"),
+    plot.title = element_text(hjust = .5),
+    plot.subtitle = element_text(hjust = .5)
+  )
+### 2022
+provs_22 <- provs_22 %>%
+  left_join(prov_22[,c("IL3","PROV")], 
+            by = c("ine.prov.name"="PROV"))
+
+plot_IL3_22 <- ggplot(provs_22) +
+  geom_sf(aes(fill = IL3), alpha = 0.9, color = NA) +
+  scale_fill_gradientn(
+    colors = hcl.colors(100, "Red-Green"),
+    breaks = breaks3,
+    limits = limits3,
+    labels = scales::label_comma(),
+    guide = guide_legend()
+  ) +
+  labs(
+    fill = "IL(>85)",
+    title = "2022"
+  ) +
+  theme_void() +
+  theme(
+    plot.background = element_rect("grey80"),
+    text = element_text(face = "bold"),
+    plot.title = element_text(hjust = .5),
+    plot.subtitle = element_text(hjust = .5)
+  )
+# Combine all the plots
+grid.arrange(plot_IL3_12, plot_IL3_14, plot_IL3_16, plot_IL3_18, plot_IL3_20, plot_IL3_22, nrow = 3, ncol = 2, 
+             widths = unit(c(8,8), "cm"),
+             heights = unit(c(5, 5, 5), "cm"))
+### Tables
+wanted_cols <- c("year","PROV","IL3")
+# 2012
+# Order by IL to get the smallest values
+prov_12_sorted_asc <- prov_12[order(prov_12$IL3), ]
+# Extract the 3 smallest values
+smallest_12 <- head(prov_12_sorted_asc[,wanted_cols], 3)
+# Order by IL to get the largest values
+prov_12_sorted_desc <- prov_12[order(prov_12$IL3, decreasing = TRUE), ]
+# Extract the 3 largest values
+largest_12 <- head(prov_12_sorted_desc[,wanted_cols], 3)
+# 2014
+prov_14_sorted_asc <- prov_14[order(prov_14$IL3), ]
+smallest_14 <- head(prov_14_sorted_asc[,wanted_cols], 3)
+prov_14_sorted_desc <- prov_14[order(prov_14$IL3, decreasing = TRUE), ]
+largest_14 <- head(prov_14_sorted_desc[,wanted_cols], 3)
+# 2016
+prov_16_sorted_asc <- prov_16[order(prov_16$IL3), ]
+smallest_16 <- head(prov_16_sorted_asc[,wanted_cols], 3)
+prov_16_sorted_desc <- prov_16[order(prov_16$IL3, decreasing = TRUE), ]
+largest_16 <- head(prov_16_sorted_desc[,wanted_cols], 3)
+# 2018
+prov_18_sorted_asc <- prov_18[order(prov_18$IL3), ]
+smallest_18 <- head(prov_18_sorted_asc[,wanted_cols], 3)
+prov_18_sorted_desc <- prov_18[order(prov_18$IL3, decreasing = TRUE), ]
+largest_18 <- head(prov_18_sorted_desc[,wanted_cols], 3)
+# 2020
+prov_20_sorted_asc <- prov_20[order(prov_20$IL3), ]
+smallest_20 <- head(prov_20_sorted_asc[,wanted_cols], 3)
+prov_20_sorted_desc <- prov_20[order(prov_20$IL3, decreasing = TRUE), ]
+largest_20 <- head(prov_20_sorted_desc[,wanted_cols], 3)
+# 2022
+prov_22_sorted_asc <- prov_22[order(prov_22$IL3), ]
+smallest_22 <- head(prov_22_sorted_asc[,wanted_cols], 3)
+prov_22_sorted_desc <- prov_22[order(prov_22$IL3, decreasing = TRUE), ]
+largest_22 <- head(prov_22_sorted_desc[,wanted_cols], 3)
+# Combination
+smallest_IL3 <- rbind(smallest_12,smallest_14,smallest_16,
+                     smallest_18,smallest_20,smallest_22)
+largest_IL3 <- rbind(largest_12,largest_14,largest_16,largest_18,
+                     largest_20,largest_22)
+combined_IL3 <- cbind(largest_IL3, smallest_IL3[,c("PROV","IL3")])
+combined_IL3
+
+### Time series
+tenerife <- c(
+  prov_12[prov_12$PROV == "Tenerife", "IL3"][[1]],
+  prov_14[prov_14$PROV == "Tenerife", "IL3"][[1]],
+  prov_16[prov_16$PROV == "Tenerife", "IL3"][[1]],
+  prov_18[prov_18$PROV == "Tenerife", "IL3"][[1]],
+  prov_20[prov_20$PROV == "Tenerife", "IL3"][[1]],
+  prov_22[prov_22$PROV == "Tenerife", "IL3"][[1]]
+)
+malaga <- c(
+  prov_12[prov_12$PROV == "Malaga", "IL3"][[1]],
+  prov_14[prov_14$PROV == "Malaga", "IL3"][[1]],
+  prov_16[prov_16$PROV == "Malaga", "IL3"][[1]],
+  prov_18[prov_18$PROV == "Malaga", "IL3"][[1]],
+  prov_20[prov_20$PROV == "Malaga", "IL3"][[1]],
+  prov_22[prov_22$PROV == "Malaga", "IL3"][[1]]
+)
+
+melilla <- c(
+  prov_12[prov_12$PROV == "Melilla", "IL3"][[1]],
+  prov_14[prov_14$PROV == "Melilla", "IL3"][[1]],
+  prov_16[prov_16$PROV == "Melilla", "IL3"][[1]],
+  prov_18[prov_18$PROV == "Melilla", "IL3"][[1]],
+  prov_20[prov_20$PROV == "Melilla", "IL3"][[1]],
+  prov_22[prov_22$PROV == "Melilla", "IL3"][[1]]
+)
+jaen <- c(
+  prov_12[prov_12$PROV=="Jaen","IL3"][[1]], 
+  prov_14[prov_14$PROV=="Jaen","IL3"][[1]], 
+  prov_16[prov_16$PROV=="Jaen","IL3"][[1]], 
+  prov_18[prov_18$PROV=="Jaen","IL3"][[1]], 
+  prov_20[prov_20$PROV=="Jaen","IL3"][[1]], 
+  prov_22[prov_22$PROV=="Jaen","IL3"][[1]]
+  )
+murcia <- c(
+  prov_12[prov_12$PROV=="Murcia","IL3"][[1]], 
+  prov_14[prov_14$PROV=="Murcia","IL3"][[1]], 
+  prov_16[prov_16$PROV=="Murcia","IL3"][[1]], 
+  prov_18[prov_18$PROV=="Murcia","IL3"][[1]], 
+  prov_20[prov_20$PROV=="Murcia","IL3"][[1]], 
+  prov_22[prov_22$PROV=="Murcia","IL3"][[1]]
+  )
+badajoz <- c(
+  prov_12[prov_12$PROV=="Badajoz","IL3"][[1]], 
+  prov_14[prov_14$PROV=="Badajoz","IL3"][[1]], 
+  prov_16[prov_16$PROV=="Badajoz","IL3"][[1]], 
+  prov_18[prov_18$PROV=="Badajoz","IL3"][[1]], 
+  prov_20[prov_20$PROV=="Badajoz","IL3"][[1]], 
+  prov_22[prov_22$PROV=="Badajoz","IL3"][[1]]
+  )
+data_short <- data.frame(
+  Year = c(2012, 2014, 2016, 2018, 2020, 2022),
+  Tenerife = tenerife,
+  Malaga = malaga,
+  Murcia = murcia,
+  Badajoz = badajoz,
+  Jaen = jaen,
+  Melilla = melilla
+)
+# TIME SERIES
+data_long <- gather(data_short, key = "Province", value = "LocationIndex", -Year)
+ggplot(data_long, aes(x = Year, y = LocationIndex, color = Province, group = Province)) +
+  geom_line(linewidth = 1) +
+  geom_point(linewidth = 2) +
+  scale_x_continuous(
+    breaks = c(2012, 2014, 2016, 2018, 2020, 2022)
+  ) +
+  labs(title = NULL,
+       x = "Year",
+       y = "IL (>85)",
+       color = "Province") +
+  theme_minimal()+
+  theme(
+    legend.text = element_text(size = 18),  
+    legend.title = element_text(size = 18)    
+  )
+
+##########################################################
+# SEX RATIO AGES 65 AND ABOVE (PROVINCES)
+##########################################################
+# Summarize by province and Year
+mf_prov <- data %>%
+  group_by(PROV, year) %>%
+  summarize(olderm_65 = sum(Totalm_65),
+            olderf_65 = sum(Totalf_65),
+            olderm_85 = sum(Totalm_85),
+            olderf_85 = sum(Totalf_85),
+            olderm_100 = sum(m_100),
+            olderf_100 = sum(f_100))
+
+# Print the resulting dataframe
+print(mf_prov)
+
+# Compute SEX RATIO for every year
+# 2012
+mf_12 <- mf_prov[mf_prov$year==2012,]
+mf_12$SR_65 <- mf_12$olderm_65/mf_12$olderf_65*100
+mf_12$SR_85 <- mf_12$olderm_85/mf_12$olderf_85*100
+mf_12$SR_100 <- mf_12$olderm_100/mf_12$olderf_100*100
+# 2014
+mf_14 <- mf_prov[mf_prov$year==2014,]
+mf_14$SR_65 <- mf_14$olderm_65/mf_14$olderf_65*100
+mf_14$SR_85 <- mf_14$olderm_85/mf_14$olderf_85*100
+mf_14$SR_100 <- mf_14$olderm_100/mf_14$olderf_100*100
+# 2016
+mf_16 <- mf_prov[mf_prov$year==2016,]
+mf_16$SR_65 <- mf_16$olderm_65/mf_16$olderf_65*100
+mf_16$SR_85 <- mf_16$olderm_85/mf_16$olderf_85*100
+mf_16$SR_100 <- mf_16$olderm_100/mf_16$olderf_100*100
+# 2018
+mf_18 <- mf_prov[mf_prov$year==2018,]
+mf_18$SR_65 <- mf_18$olderm_65/mf_18$olderf_65*100
+mf_18$SR_85 <- mf_18$olderm_85/mf_18$olderf_85*100
+mf_18$SR_100 <- mf_18$olderm_100/mf_18$olderf_100*100
+# 2020
+mf_20 <- mf_prov[mf_prov$year==2020,]
+mf_20$SR_65 <- mf_20$olderm_65/mf_20$olderf_65*100
+mf_20$SR_85 <- mf_20$olderm_85/mf_20$olderf_85*100
+mf_20$SR_100 <- mf_20$olderm_100/mf_20$olderf_100*100
+# 2022
+mf_22 <- mf_prov[mf_prov$year==2022,]
+mf_22$SR_65 <- mf_22$olderm_65/mf_22$olderf_65*100
+mf_22$SR_85 <- mf_22$olderm_85/mf_22$olderf_85*100
+mf_22$SR_100 <- mf_22$olderm_100/mf_22$olderf_100*100
+min_SR_65 <- min(c(min(mf_12$SR_65), min(mf_14$SR_65),
+                min(mf_16$SR_65), min(mf_18$SR_65),
+                min(mf_20$SR_65), min(mf_22$SR_65)))
+
+max_SR_65 <- max(c(max(mf_12$SR_65), max(mf_14$SR_65),
+                max(mf_16$SR_65), max(mf_18$SR_65),
+                max(mf_20$SR_65), max(mf_22$SR_65)))
+
+min_SR_85 <- min(c(min(mf_12$SR_85), min(mf_14$SR_85),
+                min(mf_16$SR_85), min(mf_18$SR_85),
+                min(mf_20$SR_85), min(mf_22$SR_85)))
+
+max_SR_85 <- max(c(max(mf_12$SR_85), max(mf_14$SR_85),
+                max(mf_16$SR_85), max(mf_18$SR_85),
+                max(mf_20$SR_85), max(mf_22$SR_85)))
+
+min_SR_100 <- min(c(min(mf_12$SR_100), min(mf_14$SR_100),
+                min(mf_16$SR_100), min(mf_18$SR_100),
+                min(mf_20$SR_100), min(mf_22$SR_100)))
+
+max_SR_100 <- max(c(max(mf_12$SR_100), max(mf_14$SR_100),
+                max(mf_16$SR_100), max(mf_18$SR_100),
+                max(mf_20$SR_100), max(mf_22$SR_100)))
+# We define the limits that we will use in the next plots
+limits_65 <- c(min_SR_65, max_SR_65)
+breaks_65 <- limits_65[1] + c(0, 0.25*(limits_65[2]-limits_65[1]),
+            0.5*(limits_65[2]-limits_65[1]),
+            0.75*(limits_65[2]-limits_65[1]),limits_65[2]-limits_65[1])
+
+limits_85 <- c(min_SR_85, max_SR_85)
+breaks_85 <- limits_85[1] + c(0, 0.25*(limits_85[2]-limits_85[1]),
+            0.5*(limits_85[2]-limits_85[1]),
+            0.75*(limits_85[2]-limits_85[1]),limits_85[2]-limits_85[1])
+
+limits_100 <- c(min_SR_100, max_SR_100)
+breaks_100 <- limits_100[1] + c(0, 0.25*(limits_100[2]-limits_100[1]),
+            0.5*(limits_100[2]-limits_100[1]),
+            0.75*(limits_100[2]-limits_100[1]),limits_100[2]-limits_100[1])
+
+### 2012
+provs_12 <- provs_12 %>%
+  left_join(mf_12, by = c("ine.prov.name"="PROV"))
+plot_SR65_12 <- ggplot(provs_12) +
+  geom_sf(aes(fill = SR_65), alpha = 0.9, color = NA) +
+  scale_fill_gradientn(
+    colors = hcl.colors(100, "Red-Green"),
+    breaks = breaks_65,
+    limits = limits_65,
+    labels = scales::label_comma(),
+    guide = guide_legend()
+  ) +
+  labs(
+    fill = "SR (>65)",
+    title = "2012"
+  ) +
+  theme_void() +
+  theme(
+    plot.background = element_rect("grey80"),
+    text = element_text(face = "bold"),
+    plot.title = element_text(hjust = .5),
+    plot.subtitle = element_text(hjust = .5)
+  )
+### 2014
+provs_14 <- provs_14 %>%
+  left_join(mf_14, by = c("ine.prov.name"="PROV"))
+plot_SR65_14 <- ggplot(provs_14) +
+  geom_sf(aes(fill = SR_65), alpha = 0.9, color = NA) +
+  scale_fill_gradientn(
+    colors = hcl.colors(100, "Red-Green"),
+    breaks = breaks_65,
+    limits = limits_65,
+    labels = scales::label_comma(),
+    guide = guide_legend()
+  ) +
+  labs(
+    fill = "SR (>65)",
+    title = "2014"
+  ) +
+  theme_void() +
+  theme(
+    plot.background = element_rect("grey80"),
+    text = element_text(face = "bold"),
+    plot.title = element_text(hjust = .5),
+    plot.subtitle = element_text(hjust = .5)
+  )
+### 2016
+provs_16 <- provs_16 %>%
+  left_join(mf_16, by = c("ine.prov.name"="PROV"))
+plot_SR65_16 <- ggplot(provs_16) +
+  geom_sf(aes(fill = SR_65), alpha = 0.9, color = NA) +
+  scale_fill_gradientn(
+    colors = hcl.colors(100, "Red-Green"),
+    breaks = breaks_65,
+    limits = limits_65,
+    labels = scales::label_comma(),
+    guide = guide_legend()
+  ) +
+  labs(
+    fill = "SR (>65)",
+    title = "2016") +
+  theme_void() +
+  theme(
+    plot.background = element_rect("grey80"),
+    text = element_text(face = "bold"),
+    plot.title = element_text(hjust = .5),
+    plot.subtitle = element_text(hjust = .5)
+  )
+### 2018
+provs_18 <- provs_18 %>%
+  left_join(mf_18, by = c("ine.prov.name"="PROV"))
+
+# At this point, we are ready to plot the SR of each province
+plot_SR65_18 <- ggplot(provs_18) +
+  geom_sf(aes(fill = SR_65), alpha = 0.9, color = NA) +
+  scale_fill_gradientn(
+    colors = hcl.colors(100, "Red-Green"),
+    breaks = breaks_65,
+    limits = limits_65,
+    labels = scales::label_comma(),
+    guide = guide_legend()
+  ) +
+  labs(
+    fill = "SR (>65)",
+    title = "2018"
+  ) +
+  theme_void() +
+  theme(
+    plot.background = element_rect("grey80"),
+    text = element_text(face = "bold"),
+    plot.title = element_text(hjust = .5),
+    plot.subtitle = element_text(hjust = .5)
+  )
+### 2020
+provs_20 <- provs_20 %>%
+  left_join(mf_20, by = c("ine.prov.name"="PROV"))
+plot_SR65_20 <- ggplot(provs_20) +
+  geom_sf(aes(fill = SR_65), alpha = 0.9, color = NA) +
+  scale_fill_gradientn(
+    colors = hcl.colors(100, "Red-Green"),
+    breaks = breaks_65,
+    limits = limits_65,
+    labels = scales::label_comma(),
+    guide = guide_legend()
+  ) +
+  labs(
+    fill = "SR (>65)",
+    title = "2020"
+  ) +
+  theme_void() +
+  theme(
+    plot.background = element_rect("grey80"),
+    text = element_text(face = "bold"),
+    plot.title = element_text(hjust = .5),
+    plot.subtitle = element_text(hjust = .5)
+  )
+### 2022
+provs_22 <- provs_22 %>%
+  left_join(mf_22, by = c("ine.prov.name"="PROV"))
+plot_SR65_22 <- ggplot(provs_22) +
+  geom_sf(aes(fill = SR_65), alpha = 0.9, color = NA) +
+  scale_fill_gradientn(
+    colors = hcl.colors(100, "Red-Green"),
+    breaks = breaks_65,
+    limits = limits_65,
+    labels = scales::label_comma(),
+    guide = guide_legend()
+  ) +
+  labs(
+    fill = "SR (>65)",
+    title = "2022"
+  ) +
+  theme_void() +
+  theme(
+    plot.background = element_rect("grey80"),
+    text = element_text(face = "bold"),
+    plot.title = element_text(hjust = .5),
+    plot.subtitle = element_text(hjust = .5)
+  )
+# Combine all the plots
+grid.arrange(plot_SR65_12, plot_SR65_14, plot_SR65_16, plot_SR65_18, plot_SR65_20, plot_SR65_22, nrow = 3, ncol = 2, 
+             widths = unit(c(8,8), "cm"),
+             heights = unit(c(5, 5, 5), "cm"))
+
+### Tables
+wanted_cols <- c("year","PROV", "SR_65")
+# 2012
+# Order by SR_65 to get the smallest values
+mf_12_sorted_asc <- mf_12[order(mf_12$SR_65), ]
+# Extract the 3 smallest values
+smallest_12 <- head(mf_12_sorted_asc[,wanted_cols], 3)
+# Order by SR_65 to get the largest values
+mf_12_sorted_desc <- mf_12[order(mf_12$SR_65, decreasing = TRUE), ]
+# Extract the 3 largest values
+largest_12 <- head(mf_12_sorted_desc[,wanted_cols], 3)
+# 2014
+mf_14_sorted_asc <- mf_14[order(mf_14$SR_65), ]
+smallest_14 <- head(mf_14_sorted_asc[,wanted_cols], 3)
+mf_14_sorted_desc <- mf_14[order(mf_14$SR_65, decreasing = TRUE), ]
+largest_14 <- head(mf_14_sorted_desc[,wanted_cols], 3)
+# 2016
+mf_16_sorted_asc <- mf_16[order(mf_16$SR_65), ]
+smallest_16 <- head(mf_16_sorted_asc[,wanted_cols], 3)
+mf_16_sorted_desc <- mf_16[order(mf_16$SR_65, decreasing = TRUE), ]
+largest_16 <- head(mf_16_sorted_desc[,wanted_cols], 3)
+# 2018
+mf_18_sorted_asc <- mf_18[order(mf_18$SR_65), ]
+smallest_18 <- head(mf_18_sorted_asc[,wanted_cols], 3)
+mf_18_sorted_desc <- mf_18[order(mf_18$SR_65, decreasing = TRUE), ]
+largest_18 <- head(mf_18_sorted_desc[,wanted_cols], 3)
+# 2020
+mf_20_sorted_asc <- mf_20[order(mf_20$SR_65), ]
+smallest_20 <- head(mf_20_sorted_asc[,wanted_cols], 3)
+mf_20_sorted_desc <- mf_20[order(mf_20$SR_65, decreasing = TRUE), ]
+largest_20 <- head(mf_20_sorted_desc[,wanted_cols], 3)
+# 2022
+mf_22_sorted_asc <- mf_22[order(mf_22$SR_65), ]
+smallest_22 <- head(mf_22_sorted_asc[,wanted_cols], 3)
+mf_22_sorted_desc <- mf_22[order(mf_22$SR_65, decreasing = TRUE), ]
+largest_22 <- head(mf_22_sorted_desc[,wanted_cols], 3)
+# Combination
+smallest_SR_65 <- rbind(smallest_12,smallest_14,smallest_16,
+                     smallest_18,smallest_20,smallest_22)
+largest_SR_65 <- rbind(largest_12,largest_14,largest_16,largest_18,
+                     largest_20,largest_22)
+combined_SR_65 <- cbind(largest_SR_65, smallest_SR_65[,c("PROV","SR_65")])
+combined_SR_65
