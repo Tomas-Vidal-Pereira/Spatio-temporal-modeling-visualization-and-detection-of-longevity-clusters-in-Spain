@@ -1,0 +1,1560 @@
+####################################
+# IMPORT LIBRARIES AND LOAD THE DATA
+####################################
+
+library(readxl)
+library(VIM)
+library(ggplot2)
+library(gridExtra)
+library(dplyr)
+library(mapSpain)
+library(GGally)
+library(forcats)
+library(tidyr)
+
+setwd("C:/Users/Usuario/Documents/MASTER/TFM")
+data.12 <- read_excel ("habsxcp-2012.xlsx")
+data.14 <- read_excel ("habsxcp-2014.xlsx")
+data.16 <- read_excel ("habsxcp-2016.xlsx")
+data.18 <- read_excel ("habsxcp-2018.xlsx")
+data.20 <- read_excel ("habsxcp-2020.xlsx")
+data.22 <- read_excel ("habsxcp-2022.xlsx")
+
+################################################
+# DATA PROCESSING AND EXPLORATORY DATA ANALYSIS
+################################################
+
+chr_vars <- c("idcp", "CCAA", "PROV", "COMARCA", "MUNICIPIO", "COD_INE", "COD_POSTAL")
+data.12[chr_vars] <- lapply(data.12[chr_vars], factor)
+data.14[chr_vars] <- lapply(data.14[chr_vars], factor)
+data.16[chr_vars] <- lapply(data.16[chr_vars], factor)
+data.18[chr_vars] <- lapply(data.18[chr_vars], factor)
+data.20[chr_vars] <- lapply(data.20[chr_vars], factor)
+data.22[chr_vars] <- lapply(data.22[chr_vars], factor)
+
+# Convert all numeric columns except Coord_X_ce, Coord_Y_ce to integers by rounding
+excluded_columns <- c("Coord_X_ce","Coord_Y_ce")
+data.12 <- data.12 %>%
+  mutate(across(where(is.numeric) & !all_of(excluded_columns), ~ round(.)))
+data.14 <- data.14 %>%
+  mutate(across(where(is.numeric) & !all_of(excluded_columns), ~ round(.)))
+data.16 <- data.16 %>%
+  mutate(across(where(is.numeric) & !all_of(excluded_columns), ~ round(.)))
+data.18 <- data.18 %>%
+  mutate(across(where(is.numeric) & !all_of(excluded_columns), ~ round(.)))
+data.20 <- data.20 %>%
+  mutate(across(where(is.numeric) & !all_of(excluded_columns), ~ round(.)))
+data.22 <- data.22 %>%
+  mutate(across(where(is.numeric) & !all_of(excluded_columns), ~ round(.)))
+
+# Create a vector where every year appears as many observations the corresponding data set has
+year <- as.factor(c(rep(2012,nrow(data.12)), rep(2014,nrow(data.14)), rep(2016,nrow(data.16)),
+          rep(2018,nrow(data.18)), rep(2020,nrow(data.20)), rep(2022,nrow(data.22))))
+# Concatenate the data sets
+data <- rbind(data.12, data.14, data.16, data.18, data.20, data.22)
+# Add the variable year
+data <- cbind(data, year)
+
+mice_plot <- aggr(data, col=c('navyblue','yellow'),numbers=TRUE, sortVars=TRUE,labels=names(data), cex.axis=.7,gap=3,ylab=c("Missing data","Pattern"))
+
+variables_with_missing <- data[, !(names(data) %in% c("idcp", "CCAA","PROV","COMARCA","MUNICIPIO","COD_INE","COD_POSTAL","Coord_X_ce","Coord_Y_ce"))]
+# subset the observations with missing values only (except the excluded variables)
+subset_with_missing <- subset(data, is.na(variables_with_missing))
+print(subset_with_missing)
+
+data <- na.omit(data)
+data.18 <- na.omit(data.18)
+
+data.12[data.12$PROV=="Almería","PROV"]="Almeria"
+data.12[data.12$PROV=="Rioja","PROV"]="La Rioja"
+data.14[data.14$PROV=="Almería","PROV"]="Almeria"
+data.14[data.14$PROV=="Rioja","PROV"]="La Rioja"
+data.16[data.16$PROV=="Almería","PROV"]="Almeria"
+data.16[data.16$PROV=="Rioja","PROV"]="La Rioja"
+data.18[data.18$PROV=="Almería","PROV"]="Almeria"
+data.18[data.18$PROV=="Rioja","PROV"]="La Rioja"
+data.20[data.20$PROV=="Almería","PROV"]="Almeria"
+data.20[data.20$PROV=="Rioja","PROV"]="La Rioja"
+data.22[data.22$PROV=="Almería","PROV"]="Almeria"
+data.22[data.22$PROV=="Rioja","PROV"]="La Rioja"
+data[data$PROV=="Almería","PROV"]="Almeria"
+data[data$PROV=="Rioja","PROV"]="La Rioja"
+
+# Create 3 new variables: Total>65, Total>85, Total>100
+data$Total_65 <- data$m_65_69+data$m_70_74+data$m_75_79+data$m_80_84+
+  data$m_85_89+data$m_90_94+data$m_95_99+data$m_100+data$f_65_69+
+  data$f_70_74+data$f_75_79+data$f_80_84+data$f_85_89+data$f_90_94+
+  data$f_95_99+data$f_100
+
+data$Total_85 <-data$m_85_89+data$m_90_94+data$m_95_99+data$m_100+
+  +data$f_85_89+data$f_90_94+data$f_95_99+data$f_100
+
+data$Total_100 <- data$m_100+data$f_100
+
+## MUNICIPALITIES
+
+munics_12 <- esp_get_munic()
+munics_12$ine.prov.name <- factor(munics_12$ine.prov.name)
+munics_12 <- munics_12 %>%
+  mutate(ine.prov.name = fct_recode(ine.prov.name,
+                               "Alava"="Araba/Álava",
+                               "Alicante"="Alicante/Alacant",
+                               "Almeria"="Almería",
+                               "Avila"="Ávila",
+                               "Baleares"="Balears, Illes",
+                               "Caceres"="Cáceres",
+                               "Cadiz"="Cádiz",
+                               "Castellon"="Castellón/Castelló",
+                               "Ciudad-real"="Ciudad Real",
+                               "Cordoba"="Córdoba",
+                               "Coruna"="Coruña, A",
+                               "Jaen"="Jaén",
+                               "Las-palmas"="Palmas, Las",
+                               "Leon"="León",
+                               "Malaga"="Málaga",
+                               "La Rioja"="Rioja, La",
+                               "Tenerife"="Santa Cruz de Tenerife",
+                               "Valencia"="Valencia/València"))
+
+
+# 2014
+munics_14 <- esp_get_munic()
+munics_14$ine.prov.name <- factor(munics_14$ine.prov.name)
+munics_14 <- munics_14 %>%
+  mutate(ine.prov.name = fct_recode(ine.prov.name,
+                               "Alava"="Araba/Álava",
+                               "Alicante"="Alicante/Alacant",
+                               "Almeria"="Almería",
+                               "Avila"="Ávila",
+                               "Baleares"="Balears, Illes",
+                               "Caceres"="Cáceres",
+                               "Cadiz"="Cádiz",
+                               "Castellon"="Castellón/Castelló",
+                               "Ciudad-real"="Ciudad Real",
+                               "Cordoba"="Córdoba",
+                               "Coruna"="Coruña, A",
+                               "Jaen"="Jaén",
+                               "Las-palmas"="Palmas, Las",
+                               "Leon"="León",
+                               "Malaga"="Málaga",
+                               "La Rioja"="Rioja, La",
+                               "Tenerife"="Santa Cruz de Tenerife",
+                               "Valencia"="Valencia/València"))
+
+# 2016
+munics_16 <- esp_get_munic()
+munics_16$ine.prov.name <- factor(munics_16$ine.prov.name)
+munics_16 <- munics_16 %>%
+  mutate(ine.prov.name = fct_recode(ine.prov.name,
+                               "Alava"="Araba/Álava",
+                               "Alicante"="Alicante/Alacant",
+                               "Almeria"="Almería",
+                               "Avila"="Ávila",
+                               "Baleares"="Balears, Illes",
+                               "Caceres"="Cáceres",
+                               "Cadiz"="Cádiz",
+                               "Castellon"="Castellón/Castelló",
+                               "Ciudad-real"="Ciudad Real",
+                               "Cordoba"="Córdoba",
+                               "Coruna"="Coruña, A",
+                               "Jaen"="Jaén",
+                               "Las-palmas"="Palmas, Las",
+                               "Leon"="León",
+                               "Malaga"="Málaga",
+                               "La Rioja"="Rioja, La",
+                               "Tenerife"="Santa Cruz de Tenerife",
+                               "Valencia"="Valencia/València"))
+
+# 2018
+munics_18 <- esp_get_munic()
+munics_18$ine.prov.name <- factor(munics_18$ine.prov.name)
+munics_18 <- munics_18 %>%
+  mutate(ine.prov.name = fct_recode(ine.prov.name,
+                               "Alava"="Araba/Álava",
+                               "Alicante"="Alicante/Alacant",
+                               "Almeria"="Almería",
+                               "Avila"="Ávila",
+                               "Baleares"="Balears, Illes",
+                               "Caceres"="Cáceres",
+                               "Cadiz"="Cádiz",
+                               "Castellon"="Castellón/Castelló",
+                               "Ciudad-real"="Ciudad Real",
+                               "Cordoba"="Córdoba",
+                               "Coruna"="Coruña, A",
+                               "Jaen"="Jaén",
+                               "Las-palmas"="Palmas, Las",
+                               "Leon"="León",
+                               "Malaga"="Málaga",
+                               "La Rioja"="Rioja, La",
+                               "Tenerife"="Santa Cruz de Tenerife",
+                               "Valencia"="Valencia/València"))
+
+# 2020
+munics_20 <- esp_get_munic()
+munics_20$ine.prov.name <- factor(munics_20$ine.prov.name)
+munics_20 <- munics_20 %>%
+  mutate(ine.prov.name = fct_recode(ine.prov.name,
+                               "Alava"="Araba/Álava",
+                               "Alicante"="Alicante/Alacant",
+                               "Almeria"="Almería",
+                               "Avila"="Ávila",
+                               "Baleares"="Balears, Illes",
+                               "Caceres"="Cáceres",
+                               "Cadiz"="Cádiz",
+                               "Castellon"="Castellón/Castelló",
+                               "Ciudad-real"="Ciudad Real",
+                               "Cordoba"="Córdoba",
+                               "Coruna"="Coruña, A",
+                               "Jaen"="Jaén",
+                               "Las-palmas"="Palmas, Las",
+                               "Leon"="León",
+                               "Malaga"="Málaga",
+                               "La Rioja"="Rioja, La",
+                               "Tenerife"="Santa Cruz de Tenerife",
+                               "Valencia"="Valencia/València"))
+
+# 2022
+munics_22 <- esp_get_munic()
+munics_22$ine.prov.name <- factor(munics_22$ine.prov.name)
+munics_22 <- munics_22 %>%
+  mutate(ine.prov.name = fct_recode(ine.prov.name,
+                               "Alava"="Araba/Álava",
+                               "Alicante"="Alicante/Alacant",
+                               "Almeria"="Almería",
+                               "Avila"="Ávila",
+                               "Baleares"="Balears, Illes",
+                               "Caceres"="Cáceres",
+                               "Cadiz"="Cádiz",
+                               "Castellon"="Castellón/Castelló",
+                               "Ciudad-real"="Ciudad Real",
+                               "Cordoba"="Córdoba",
+                               "Coruna"="Coruña, A",
+                               "Jaen"="Jaén",
+                               "Las-palmas"="Palmas, Las",
+                               "Leon"="León",
+                               "Malaga"="Málaga",
+                               "La Rioja"="Rioja, La",
+                               "Tenerife"="Santa Cruz de Tenerife",
+                               "Valencia"="Valencia/València"))
+
+# A CORUÑA
+replacements_coruna <- c("Baña, A" = "A Baña", 
+                         "Capela, A" = "A Capela", 
+                         "Coruña, A" = "A Coruña", 
+                         "Laracha, A" = "A Laracha", 
+                        "Pobra do Caramiñal, A" = "A Pobra do Caramiñal",
+                        "Pontes de García Rodríguez, As" = "As Pontes de García Rodríguez", 
+                        "Somozas, As" = "As Somozas", 
+                        "Pino, O" = "O Pino", 
+                        "Oza-Cesuras" = "Oza-Cesuras") 
+
+# LUGO
+replacements_lugo <- c(
+  "Fonsagrada, A" = "A Fonsagrada",
+  "Incio, O" = "O Incio",
+  "Pontenova, A" = "A Pontenova",
+  "Pastoriza, A" = "A Pastoriza",
+  "Pobra do Brollón, A" = "A Pobra do Brollón",
+  "Nogais, As" = "As Nogais",
+  "Vicedo, O" = "O Vicedo",
+  "Valadouro, O" = "O Valadouro",
+  "Corgo, O" = "O Corgo",
+  "Saviñao, O" = "O Saviñao",
+  "Páramo, O" = "O Páramo"
+)
+
+# PONTEVEDRA
+replacements_pontevedra <- c(
+  "Cañiza, A" = "A Cañiza",
+  "Covelo" = "Covelo",
+  "Corgo, O" = "O Corgo",
+  "Estrada, A" = "A Estrada",
+  "Guarda, A" = "A Guarda",
+  "Lama, A" = "A Lama",
+  "Neves, As" = "As Neves",
+  "Porriño, O" = "O Porriño",
+  "Grove, O" = "O Grove",
+  "Rosal, O" = "O Rosal",
+  "Illa de Arousa, A" = "A Illa de Arousa"
+)
+
+# OURENSE
+replacements_ourense <- c(
+  "Arnoia, A" = "A Arnoia",
+  "Barco de Valdeorras, O" = "O Barco de Valdeorras",
+  "Blancos, Os" = "Os Blancos",
+  "Bola, A" = "A Bola",
+  "Bolo, O" = "O Bolo",
+  "Carballiño, O" = "O Carballiño",
+  "Gudiña, A" = "A Gudiña",
+  "Irixo, O" = "O Irixo",
+  "Merca, A" = "A Merca",
+  "Mezquita, A" = "A Mezquita",
+  "Peroxa, A" = "A Peroxa",
+  "Pobra de Trives, A" = "A Pobra de Trives",
+  "Pereiro de Aguiar, O" = "O Pereiro de Aguiar",
+  "Rúa, A" = "A Rúa",
+  "Teixeira, A" = "A Teixeira",
+  "Veiga, A" = "A Veiga"
+)
+
+# ASTURIAS
+replacements_asturias <- c(
+  "Tineo" = "Tinéu",
+  "Illano" = "Eilao",
+  "Tapia de Casariego" = "Tapia",
+  "Franco, El" = "El Franco",
+  "Coaña" = "Cuaña",
+  "San Tirso de Abres" = "San Tiso D'Abres",
+  "Candamo" = "Candamo/Candamu",
+  "Soto del Barco" = "Sotu'l Barcu",
+  "Peñamellera Alta" = "El Valle Altu de Peñamellera",
+  "Regueras, Las" = "Les Regueres"
+)
+
+# CANTABRIA
+replacements_cantabria <- c(
+  "Astillero, El" = "El Astillero",
+  "Corrales de Buelna, Los" = "Los Corrales de Buelna",
+  "Rozas de Valdearroyo, Las" = "Las Rozas de Valdearroyo",
+  "Tojos, Los" = "Los Tojos"
+)
+
+# BIZKAIA
+replacements_bizkaia <- c(
+  "Karrantza Harana / Valle de Carranza" = "Karrantza Harana/Valle de Carranza",
+  "Urduña / Orduña" = "Urduña/Orduña",
+  "Ziortza-Bolibar" = "Ziortza-Bolibar"
+)
+
+# GIPUZKOA
+replacements_gipuzkoa <- c(
+  "Arrasate / Mondragón" = "Arrasate/Mondragón",
+  "Astigarraga" = "Astigarraga",
+  "Baliarrain" = "Baliarrain",
+  "Donostia / San Sebastián" = "Donostia/San Sebastián",
+  "Lasarte-Oria" = "Lasarte-Oria"
+)
+
+# ALAVA
+replacements_alava <- c(
+  "Ribera Baja / Erribera Beitia" = "Erriberabeitia",
+  "Agurain / Salvatierra" = "Agurain/Salvatierra",
+  "Ayala / Aiara" = "Ayala/Aiara",
+  "Baños de Ebro / Mañueta" = "Baños de Ebro/Mañueta",
+  "Campezo / Kanpezu" = "Campezo/Kanpezu",
+  "Elburgo / Burgelu" = "Elburgo/Burgelu",
+  "Elvillar/Bilar" = "Elvillar/Bilar",
+  "Erriberagoitia / Ribera Alta" = "Erriberagoitia/Ribera Alta",
+  "Harana / Valle de Arana" = "Harana/Valle de Arana",
+  "Iruña Oka / Iruña de Oca" = "Iruña Oka/Iruña de Oca",
+  "Labastida / Bastida" = "Labastida/Bastida",
+  "Lanciego / Lantziego" = "Lanciego/Lantziego",
+  "Laudio / Llodio" = "Laudio/Llodio",
+  "Moreda de Álava / Moreda Araba" = "Moreda de Álava/Moreda Araba",
+  "San Millán / Donemiliaga" = "San Millán/Donemiliaga",
+  "Valdegovía / Gaubea" = "Valdegovía/Gaubea",
+  "Villabuena de Álava / Eskuernaga" = "Villabuena de Álava/Eskuernaga",
+  "Yécora / Iekora" = "Yécora/Iekora",
+  "Elvillar / Bilar" = "Elvillar/Bilar"
+)
+
+# NAVARRA
+replacements_navarra <- c(
+  "Abárzuza / Abartzuza" = "Abárzuza/Abartzuza",
+  "Abaurregaina / Abaurrea Alta" = "Abaurregaina/Abaurrea Alta",
+  "Abaurrepea / Abaurrea Baja" = "Abaurrepea/Abaurrea Baja",
+  "Aibar / Oibar" = "Aibar/Oibar",
+  "Allín / Allin" = "Allín/Allin",
+  "Altsasu / Alsasua" = "Altsasu/Alsasua",
+  "Ancín / Antzin" = "Ancín/Antzin",
+  "Ansoáin / Antsoain" = "Ansoáin/Antsoain",
+  "Aoiz / Agoitz" = "Aoiz/Agoitz",
+  "Aranarache / Aranaratxe" = "Aranarache/Aranaratxe",
+  "Arce / Artzi" = "Arce/Artzi",
+  "Atez / Atetz" = "Atez/Atetz",
+  "Auritz / Burguete" = "Auritz/Burguete",
+  "Ayegui / Aiegi" = "Ayegui/Aiegi",
+  "Barañáin / Barañain" = "Barañáin/Barañain",
+  "Berrioplano / Berriobeiti" = "Berrioplano/Berriobeiti",
+  "Burgui / Burgi" = "Burgui/Burgi",
+  "Burlada / Burlata" = "Burlada/Burlata",
+  "Cendea de Olza / Oltza Zendea" = "Cendea de Olza/Oltza Zendea",
+  "Cirauqui / Zirauki" = "Cirauqui/Zirauki",
+  "Ciriza / Ziritza" = "Ciriza/Ziritza",
+  "Doneztebe / Santesteban" = "Doneztebe/Santesteban",
+  "Echarri / Etxarri" = "Echarri/Etxarri",
+  "Enériz / Eneritz" = "Enériz/Eneritz",
+  "Esparza de Salazar / Espartza Zaraitzu" = "Esparza de Salazar/Espartza Zaraitzu",
+  "Ezcároz / Ezkaroze" = "Ezcároz/Ezkaroze",
+  "Gallipienzo / Galipentzu" = "Gallipienzo/Galipentzu",
+  "Gallués / Galoze" = "Gallués/Galoze",
+  "Güesa / Gorza" = "Güesa/Gorza",
+  "Guesálaz / Gesalatz" = "Guesálaz/Gesalatz",
+  "Hiriberri / Villanueva de Aezkoa" = "Hiriberri/Villanueva de Aezkoa",
+  "Huarte / Uharte" = "Huarte/Uharte",
+  "Isaba / Izaba" = "Isaba/Izaba",
+  "Iza / Itza" = "Iza/Itza",
+  "Izalzu / Itzaltzu" = "Izalzu/Itzaltzu",
+  "Leache / Leatxe" = "Leache/Leatxe",
+  "Leoz / Leotz" = "Leoz/Leotz",
+  "Lónguida / Longida" = "Lónguida/Longida",
+  "Luzaide / Valcarlos" = "Luzaide/Valcarlos",
+  "Monreal / Elo" = "Monreal/Elo",
+  "Navascués / Nabaskoze" = "Navascués/Nabaskoze",
+  "Noáin (Valle de Elorz) / Noain (Elortzibar)" = "Noáin (Valle de Elorz)/Noain (Elortzibar)",
+  "Ochagavía / Otsagabia" = "Ochagavía/Otsagabia",
+  "Olazti / Olazagutía" = "Olazti/Olazagutía",
+  "Olite / Erriberri" = "Olite/Erriberri",
+  "Olóriz / Oloritz" = "Olóriz/Oloritz",
+  "Oronz / Orontze" = "Oronz/Orontze",
+  "Oroz-Betelu / Orotz-Betelu" = "Oroz-Betelu/Orotz-Betelu",
+  "Orreaga / Roncesvalles" = "Orreaga/Roncesvalles",
+  "Pamplona / Iruña" = "Pamplona/Iruña",
+  "Peralta / Azkoien" = "Peralta/Azkoien",
+  "Puente la Reina / Gares" = "Puente la Reina/Gares",
+  "Roncal / Erronkari" = "Roncal/Erronkari",
+  "Salinas de Oro / Jaitz" = "Salinas de Oro/Jaitz",
+  "Sangüesa / Zangoza" = "Sangüesa/Zangoza",
+  "Sarriés / Sartze" = "Sarriés/Sartze",
+  "Ujué / Uxue" = "Ujué/Uxue",
+  "Unzué / Untzue" = "Unzué/Untzue",
+  "Urdazubi / Urdax" = "Urdazubi/Urdax",
+  "Urzainqui / Urzainki" = "Urzainqui/Urzainki",
+  "Uztárroz / Uztarroze" = "Uztárroz/Uztarroze",
+  "Valle de Egüés / Eguesibar" = "Valle de Egüés/Eguesibar",
+  "Valle de Ollo / Ollaran" = "Valle de Ollo/Ollaran",
+  "Valle de Yerri / Deierri" = "Valle de Yerri/Deierri",
+  "Vidángoz / Bidankoze" = "Vidángoz/Bidankoze",
+  "Villava / Atarrabia" = "Villava/Atarrabia",
+  "Zabalza / Zabaltza" = "Zabalza/Zabaltza",
+  "Zizur Mayor / Zizur Nagusia" = "Zizur Mayor/Zizur Nagusia",
+  "Arcos, Los" = "Los Arcos",
+  "Busto, El" = "El Busto",
+  "Lizoáin-Arriasgoiti" = "Lizoain-Arriasgoiti/Lizoainibar-Arriasgoiti",
+  "Pueyo" = "Pueyo/Puiu",
+  "Lezáun" = "Lezaun",
+  "Mendigorría" = "Mendigorria"
+)
+delete_navarra <- c(
+  "Villamayor de Monjardín"
+)
+munics_12 <- munics_12 %>%
+  filter(!(ine.prov.name == "Navarra" & name %in% delete_navarra))
+munics_14 <- munics_14 %>%
+  filter(!(ine.prov.name == "Navarra" & name %in% delete_navarra))
+munics_16 <- munics_16 %>%
+  filter(!(ine.prov.name == "Navarra" & name %in% delete_navarra))
+munics_18 <- munics_18 %>%
+  filter(!(ine.prov.name == "Navarra" & name %in% delete_navarra))
+munics_20<- munics_20 %>%
+  filter(!(ine.prov.name == "Navarra" & name %in% delete_navarra))
+munics_22 <- munics_22 %>%
+  filter(!(ine.prov.name == "Navarra" & name %in% delete_navarra))
+
+# LA RIOJA
+replacements_la_rioja <- c(
+  "Lumbreras" = "Lumbreras de Cameros",
+  "Redal, El" = "El Redal",
+  "Rasillo de Cameros, El" = "El Rasillo de Cameros",
+  "Villar de Arnedo, El" = "El Villar de Arnedo"
+)
+
+# LEON
+replacements_leon <- c(
+  "Antigua, La" = "La Antigua",
+  "Bañeza, La" = "La Bañeza",
+  "Barrios de Luna, Los" = "Los Barrios de Luna",
+  "Burgo Ranero, El" = "El Burgo Ranero",
+  "Ercina, La" = "La Ercina",
+  "Omañas, Las" = "Las Omañas",
+  "Pola de Gordón, La" = "La Pola de Gordón",
+  "Robla, La" = "La Robla",
+  "Vecilla, La" = "La Vecilla"
+)
+
+# PALENCIA
+replacements_palencia <- c(
+  "Puebla de Valdavia, La"="La Puebla de Valdavia",
+  "Vid de Ojeda, La"="La Vid de Ojeda",
+  "Serna, La" = "La Serna",
+  "Pernía, La" = "La Pernía"
+)
+
+# BURGOS
+replacements_burgos <- c(
+  "Altos, Los" = "Los Altos",
+  "Ausines, Los"="Los Ausines",
+  "Balbases, Los"="Los Balbases",
+  "Barrios de Bureba, Los" = "Los Barrios de Bureba",
+  "Gallega, La" = "La Gallega",
+  "Hormazas, Las" = "Las Hormazas",
+  "Horra, La" = "La Horra",
+  "Puebla de Arganzón, La" = "La Puebla de Arganzón",
+  "Quintanillas, Las" = "Las Quintanillas",
+  "Revilla y Ahedo, La" = "La Revilla y Ahedo",
+  "Sequera de Haza, La" = "La Sequera de Haza",
+  "Vid y Barrios, La" = "La Vid y Barrios",
+  "Vid de Bureba, La" = "La Vid de Bureba",
+  "Cueva de Roa, La" = "La Cueva de Roa"
+)
+
+# SORIA
+replacements_soria <- c(
+  "Aldehuelas, Las" = "Las Aldehuelas",
+  "Royo, El" = "El Royo",
+  "Losilla, La" = "La Losilla",
+  "Póveda de Soria, La" = "La Póveda de Soria",
+  "Riba de Escalote, La" = "La Riba de Escalote",
+  "Rábanos, Los" = "Los Rábanos",
+  "Villares de Soria, Los" = "Los Villares de Soria"
+)
+
+# ZAMORA
+replacements_zamora <- c(
+  "Bóveda de Toro, La" = "La Bóveda de Toro",
+  "Cubo de Tierra del Vino, El" = "El Cubo de Tierra del Vino",
+  "Pego, El" = "El Pego",
+  "Perdigón, El" = "El Perdigón",
+  "Piñero, El" = "El Piñero",
+  "Maderal, El" = "El Maderal",
+  "Torre del Valle, La" = "La Torre del Valle",
+  "Hiniesta, La" = "La Hiniesta"
+)
+
+
+# VALLADOLID
+replacements_valladolid <- c(
+  "Campillo, El" = "El Campillo",
+  "Mudarra, La" = "La Mudarra",
+  "Parrilla, La" = "La Parrilla",
+  "Seca, La" = "La Seca",
+  "Unión de Campos, La" = "La Unión de Campos",
+  "Zarza, La" = "La Zarza",
+  "Pedraja de Portillo, La" = "La Pedraja de Portillo"
+)
+
+# SEGOVIA
+replacements_segovia <- c(
+  "Huertos, Los" = "Los Huertos",
+  "Espinar, El" = "El Espinar",
+  "Matilla, La" = "La Matilla",
+  "Losa, La" = "La Losa",
+  "Lastrilla, La" = "La Lastrilla"
+)
+delete_segovia <- c(
+  "Pradales" 
+)
+munics_12 <- munics_12 %>%
+  filter(!(ine.prov.name == "Segovia" & name %in% delete_segovia))
+munics_14 <- munics_14 %>%
+  filter(!(ine.prov.name == "Segovia" & name %in% delete_segovia))
+munics_16 <- munics_16 %>%
+  filter(!(ine.prov.name == "Segovia" & name %in% delete_segovia))
+munics_18 <- munics_18 %>%
+  filter(!(ine.prov.name == "Segovia" & name %in% delete_segovia))
+munics_20 <- munics_20 %>%
+  filter(!(ine.prov.name == "Segovia" & name %in% delete_segovia))
+munics_22 <- munics_22 %>%
+  filter(!(ine.prov.name == "Segovia" & name %in% delete_segovia))
+
+# SALAMANCA
+replacements_salamanca <- c(
+  "Alameda de Gardón, La" = "La Alameda de Gardón",
+  "Alamedilla, La" = "La Alamedilla",
+  "Alberca, La" = "La Alberca",
+  "Alberguería de Argañán, La" = "La Alberguería de Argañán",
+  "Arco, El" = "El Arco",
+  "Atalaya, La" = "La Atalaya",
+  "Bastida, La" = "La Bastida",
+  "Bodón, El" = "El Bodón",
+  "Bouza, La" = "La Bouza",
+  "Cabaco, El" = "El Cabaco",
+  "Cabeza de Béjar, La" = "La Cabeza de Béjar",
+  "Calzada de Béjar, La" = "La Calzada de Béjar",
+  "Campo de Peñaranda, El" = "El Campo de Peñaranda",
+  "Casas del Conde, Las" = "Las Casas del Conde",
+  "Cerro, El" = "El Cerro",
+  "Cubo de Don Sancho, El" = "El Cubo de Don Sancho",
+  "Encina, La" = "La Encina",
+  "Fregeneda, La" = "La Fregeneda",
+  "Fuente de San Esteban, La" = "La Fuente de San Esteban",
+  "Hoya, La" = "La Hoya",
+  "Maíllo, El" = "El Maíllo",
+  "Manzano, El" = "El Manzano",
+  "Mata de Ledesma, La" = "La Mata de Ledesma",
+  "Maya, La" = "La Maya",
+  "Milano, El" = "El Milano",
+  "Orbada, La" = "La Orbada",
+  "Payo, El" = "El Payo",
+  "Pedroso de la Armuña, El" = "El Pedroso de la Armuña",
+  "Peña, La" = "La Peña",
+  "Pino de Tormes, El" = "El Pino de Tormes",
+  "Redonda, La" = "La Redonda",
+  "Rinconada de la Sierra, La" = "La Rinconada de la Sierra",
+  "Sagrada, La" = "La Sagrada",
+  "Santos, Los" = "Los Santos",
+  "Sahugo, El" = "El Sahugo",
+  "Sierpe, La" = "La Sierpe",
+  "Tala, La" = "La Tala",
+  "Tejado, El" = "El Tejado",
+  "Tornadizo, El" = "El Tornadizo",
+  "Veguillas, Las" = "Las Veguillas",
+  "Vellés, La" = "La Vellés",
+  "Vídola, La" = "La Vídola",
+  "Zarza de Pumareda, La" = "La Zarza de Pumareda",
+  "Ejeme" = "Éjeme"
+)
+
+# AVILA
+replacements_avila <- c(
+  "Adrada, La" = "La Adrada",
+  "Aldehuela, La" = "La Aldehuela",
+  "Arenal, El" = "El Arenal",
+  "Barco de Ávila, El" = "El Barco de Ávila",
+  "Barraco, El" = "El Barraco",
+  "Berlanas, Las" = "Las Berlanas",
+  "Bohodón, El" = "El Bohodón",
+  "Carrera, La" = "La Carrera",
+  "Colilla, La" = "La Colilla",
+  "Fresno, El" = "El Fresno",
+  "Hija de Dios, La" = "La Hija de Dios",
+  "Horcajada, La" = "La Horcajada",
+  "Hornillo, El" = "El Hornillo",
+  "Hoyo de Pinares, El" = "El Hoyo de Pinares",
+  "Losar del Barco, El" = "El Losar del Barco",
+  "Llanos de Tormes, Los" = "Los Llanos de Tormes",
+  "Mirón, El" = "El Mirón",
+  "Navas del Marqués, Las" = "Las Navas del Marqués",
+  "Oso, El" = "El Oso",
+  "Parral, El" = "El Parral",
+  "Serrada, La" = "La Serrada",
+  "Tiemblo, El" = "El Tiemblo",
+  "Torre, La" = "La Torre"
+)
+
+# HUESCA
+replacements_huesca <- c(
+  "Fueva, La" = "La Fueva",
+  "Grado, El" = "El Grado",
+  "Peñas de Riglos, Las" = "Las Peñas de Riglos",
+  "Puebla de Castro, La" = "La Puebla de Castro",
+  "Pueyo de Araguás, El" = "El Pueyo de Araguás",
+  "Sotonera, La" = "La Sotonera"
+)
+delete_huesca <- c(
+  "Vencillón"
+)
+munics_12 <- munics_12 %>%
+  filter(!(ine.prov.name == "Huesca" & name %in% delete_huesca))
+munics_14 <- munics_14 %>%
+  filter(!(ine.prov.name == "Huesca" & name %in% delete_huesca))
+munics_16 <- munics_16 %>%
+  filter(!(ine.prov.name == "Huesca" & name %in% delete_huesca))
+munics_18 <- munics_18 %>%
+  filter(!(ine.prov.name == "Huesca" & name %in% delete_huesca))
+munics_20 <- munics_20 %>%
+  filter(!(ine.prov.name == "Huesca" & name %in% delete_huesca))
+munics_22 <- munics_22 %>%
+  filter(!(ine.prov.name == "Huesca" & name %in% delete_huesca))
+
+# ZARAGOZA
+replacements_zaragoza <- c(
+  "Almolda, La" = "La Almolda",
+  "Almunia de Doña Godina, La" = "La Almunia de Doña Godina",
+  "Burgo de Ebro, El" = "El Burgo de Ebro",
+  "Buste, El" = "El Buste",
+  "Cuerlas, Las" = "Las Cuerlas",
+  "Fayos, Los" = "Los Fayos",
+  "Frago, El" = "El Frago",
+  "Frasno, El" = "El Frasno",
+  "Joyosa, La" = "La Joyosa",
+  "Muela, La" = "La Muela",
+  "Pedrosas, Las" = "Las Pedrosas",
+  "Pintanos, Los" = "Los Pintanos",
+  "Puebla de Alfindén, La" = "La Puebla de Alfindén",
+  "Vilueña, La" = "La Vilueña",
+  "Zaida, La" = "La Zaida",
+  "Jarque" = "Jarque de Moncayo"
+)
+
+# TERUEL
+replacements_teruel <- c(
+  "Cañada de Verich, La" = "La Cañada de Verich",
+  "Castellar, El" = "El Castellar",
+  "Cerollera, La" = "La Cerollera",
+  "Codoñera, La" = "La Codoñera",
+  "Cuba, La" = "La Cuba",
+  "Cuervo, El" = "El Cuervo",
+  "Fresneda, La" = "La Fresneda",
+  "Ginebrosa, La" = "La Ginebrosa",
+  "Hoz de la Vieja, La" = "La Hoz de la Vieja",
+  "Iglesuela del Cid, La" = "La Iglesuela del Cid",
+  "Mata de los Olmos, La" = "La Mata de los Olmos",
+  "Olmos, Los" = "Los Olmos",
+  "Parras de Castellote, Las" = "Las Parras de Castellote",
+  "Pobo, El" = "El Pobo",
+  "Portellada, La" = "La Portellada",
+  "Puebla de Híjar, La" = "La Puebla de Híjar",
+  "Puebla de Valverde, La" = "La Puebla de Valverde",
+  "Vallecillo, El" = "El Vallecillo",
+  "Zoma, La" = "La Zoma"
+)
+
+# LLEIDA
+replacements_lleida <- c(
+  "Alamús, Els" = "Els Alamús",
+  "Albagés, L'" = "L'Albagés",
+  "Albi, L'" = "L'Albi",
+  "Pont de Bar, El" = "El Pont de Bar",
+  "Sentiu de Sió, La" = "La Sentiu de Sió",
+  "Avellanes i Santa Linya, Les" = "Les Avellanes i Santa Linya",
+  "Baronia de Rialb, La" = "La Baronia de Rialb",
+  "Vall de Boí, La" = "La Vall de Boí",
+  "Bòrdes, Es" = "Es Bòrdes",
+  "Borges Blanques, Les" = "Les Borges Blanques",
+  "Cogul, El" = "El Cogul",
+  "Espluga Calba, L'" = "L'Espluga Calba",
+  "Floresta, La" = "La Floresta",
+  "Fuliola, La" = "La Fuliola",
+  "Granadella, La" = "La Granadella",
+  "Granja d'Escarp, La" = "La Granja d'Escarp",
+  "Molsosa, La" = "La Molsosa",
+  "Oluges, Les" = "Les Oluges",
+  "Omellons, Els" = "Els Omellons",
+  "Omells de na Gaia, Els" = "Els Omells de na Gaia",
+  "Palau d'Anglesola, El" = "El Palau d'Anglesola",
+  "Coma i la Pedra, La" = "La Coma i la Pedra",
+  "Poal, El" = "El Poal",
+  "Pobla de Cérvoles, La" = "La Pobla de Cérvoles",
+  "Pobla de Segur, La" = "La Pobla de Segur",
+  "Pont de Suert, El" = "El Pont de Suert",
+  "Portella, La" = "La Portella",
+  "Seu d'Urgell, La" = "La Seu d'Urgell",
+  "Soleràs, El" = "El Soleràs",
+  "Torms, Els" = "Els Torms",
+  "Torre de Cabdella, La" = "La Torre de Cabdella",
+  "Valls de Valira, Les" = "Les Valls de Valira",
+  "Vilosell, El" = "El Vilosell",
+  "Guingueta d'Àneu, La" = "La Guingueta d'Àneu",
+  "Valls d'Aguilar, Les" = "Les Valls d'Aguilar",
+  "Vansa i Fórnols, La" = "La Vansa i Fórnols",
+  "Plans de Sió, Els" = "Els Plans de Sió"
+)
+
+# GIRONA
+replacements_girona <- c(
+  "Far d'Empordà, El" = "El Far d'Empordà",
+  "Armentera, L'" = "L'Armentera",
+  "Vajol, La" = "La Vajol",
+  "Bisbal d'Empordà, La" = "La Bisbal d'Empordà",
+  "Escala, L'" = "L'Escala",
+  "Jonquera, La" = "La Jonquera",
+  "Llosses, Les" = "Les Llosses",
+  "Pera, La" = "La Pera",
+  "Planes d'Hostoles, Les" = "Les Planes d'Hostoles",
+  "Preses, Les" = "Les Preses",
+  "Port de la Selva, El" = "El Port de la Selva",
+  "Saus, Camallera i Llampaies" = "Saus, Camallera i Llampaies", # No change needed
+  "Selva de Mar, La" = "La Selva de Mar",
+  "Cellera de Ter, La" = "La Cellera de Ter",
+  "Tallada d'Empordà, La" = "La Tallada d'Empordà",
+  "Vall d'en Bas, La" = "La Vall d'en Bas",
+  "Vall de Bianya, La" = "La Vall de Bianya",
+  "Brunyola" = "Brunyola i Sant Martí Sapresa",
+  "Calonge" = "Calonge i Sant Antoni"
+)
+
+# BARCELONA
+replacements_barcelona <- c(
+  "Ametlla del Vallès, L'" = "L'Ametlla del Vallès",
+  "Bruc, El" = "El Bruc",
+  "Brull, El" = "El Brull",
+  "Cabanyes, Les" = "Les Cabanyes",
+  "Espunyola, L'" = "L'Espunyola",
+  "Estany, L'" = "L'Estany",
+  "Franqueses del Vallès, Les" = "Les Franqueses del Vallès",
+  "Garriga, La" = "La Garriga",
+  "Granada, La" = "La Granada",
+  "Hospitalet de Llobregat, L'" = "L'Hospitalet de Llobregat",
+  "Llacuna, La" = "La Llacuna",
+  "Llagosta, La" = "La Llagosta",
+  "Masies de Roda, Les" = "Les Masies de Roda",
+  "Masies de Voltregà, Les" = "Les Masies de Voltregà",
+  "Masnou, El" = "El Masnou",
+  "Nou de Berguedà, La" = "La Nou de Berguedà",
+  "Papiol, El" = "El Papiol",
+  "Hostalets de Pierola, Els" = "Els Hostalets de Pierola",
+  "Pla del Penedès, El" = "El Pla del Penedès",
+  "Pobla de Claramunt, La" = "La Pobla de Claramunt",
+  "Pobla de Lillet, La" = "La Pobla de Lillet",
+  "Prat de Llobregat, El" = "El Prat de Llobregat",
+  "Prats de Rei, Els" = "Els Prats de Rei",
+  "Quar, La" = "La Quar",
+  "Roca del Vallès, La" = "La Roca del Vallès",
+  "Pont de Vilomara i Rocafort, El" = "El Pont de Vilomara i Rocafort",
+  "Esquirol, L'" = "L'Esquirol",
+  "Torre de Claramunt, La" = "La Torre de Claramunt",
+  "Palma de Cervelló, La" = "La Palma de Cervelló",
+  "Bigues i Riells" = "Bigues i Riells del Fai"
+)
+
+# TARRAGONA
+replacements_tarragona <- c(
+  "Albiol, L'" = "L'Albiol",
+  "Aleixar, L'" = "L'Aleixar",
+  "Ametlla de Mar, L'" = "L'Ametlla de Mar",
+  "Arboç, L'" = "L'Arboç",
+  "Argentera, L'" = "L'Argentera",
+  "Bisbal de Falset, La" = "La Bisbal de Falset",
+  "Bisbal del Penedès, La" = "La Bisbal del Penedès",
+  "Borges del Camp, Les" = "Les Borges del Camp",
+  "Catllar, El" = "El Catllar",
+  "Sénia, La" = "La Sénia",
+  "Espluga de Francolí, L'" = "L'Espluga de Francolí",
+  "Fatarella, La" = "La Fatarella",
+  "Febró, La" = "La Febró",
+  "Figuera, La" = "La Figuera",
+  "Galera, La" = "La Galera",
+  "Garidells, Els" = "Els Garidells",
+  "Guiamets, Els" = "Els Guiamets",
+  "Lloar, El" = "El Lloar",
+  "Masó, La" = "La Masó",
+  "Masroig, El" = "El Masroig",
+  "Milà, El" = "El Milà",
+  "Molar, El" = "El Molar",
+  "Montmell, El" = "El Montmell",
+  "Morell, El" = "El Morell",
+  "Morera de Montsant, La" = "La Morera de Montsant",
+  "Nou de Gaià, La" = "La Nou de Gaià",
+  "Palma d'Ebre, La" = "La Palma d'Ebre",
+  "Pallaresos, Els" = "Els Pallaresos",
+  "Perelló, El" = "El Perelló",
+  "Piles, Les" = "Les Piles",
+  "Pinell de Brai, El" = "El Pinell de Brai",
+  "Pla de Santa Maria, El" = "El Pla de Santa Maria",
+  "Pobla de Mafumet, La" = "La Pobla de Mafumet",
+  "Pobla de Massaluca, La" = "La Pobla de Massaluca",
+  "Pobla de Montornès, La" = "La Pobla de Montornès",
+  "Pont d'Armentera, El" = "El Pont d'Armentera",
+  "Riba, La" = "La Riba",
+  "Riera de Gaià, La" = "La Riera de Gaià",
+  "Rourell, El" = "El Rourell",
+  "Secuita, La" = "La Secuita",
+  "Selva del Camp, La" = "La Selva del Camp",
+  "Torre de Fontaubella, La" = "La Torre de Fontaubella",
+  "Torre de l'Espanyol, La" = "La Torre de l'Espanyol",
+  "Vendrell, El" = "El Vendrell",
+  "Vilella Alta, La" = "La Vilella Alta",
+  "Vilella Baixa, La" = "La Vilella Baixa",
+  "Aldea, L'" = "L'Aldea",
+  "Ampolla, L'" = "L'Ampolla",
+  "Canonja, La" = "La Canonja"
+)
+
+# MADRID
+replacements_madrid <- c(
+  "Acebeda, La" = "La Acebeda",
+  "Álamo, El" = "El Álamo",
+  "Atazar, El" = "El Atazar",
+  "Berrueco, El" = "El Berrueco",
+  "Boalo, El" = "El Boalo",
+  "Cabrera, La" = "La Cabrera",
+  "Escorial, El" = "El Escorial",
+  "Hiruela, La" = "La Hiruela",
+  "Molar, El" = "El Molar",
+  "Molinos, Los" = "Los Molinos",
+  "Rozas de Madrid, Las" = "Las Rozas de Madrid",
+  "Santos de la Humosa, Los" = "Los Santos de la Humosa",
+  "Serna del Monte, La" = "La Serna del Monte",
+  "Vellón, El" = "El Vellón"
+)
+
+# CACERES
+replacements_caceres <- c(
+  "Aldea del Obispo, La" = "La Aldea del Obispo",
+  "Cumbre, La" = "La Cumbre",
+  "Garganta, La" = "La Garganta",
+  "Gordo, El" = "El Gordo",
+  "Granja, La" = "La Granja",
+  "Pesga, La" = "La Pesga",
+  "Torno, El" = "El Torno",
+  "Higuera" = "Higuera de Albalat"
+)
+delete_caceres <- c(
+  "Pueblonuevo de Miramontes",
+  "Tiétar"
+)
+munics_12 <- munics_12 %>%
+  filter(!(ine.prov.name == "Caceres" & name %in% delete_caceres))
+munics_14 <- munics_14 %>%
+  filter(!(ine.prov.name == "Caceres" & name %in% delete_caceres))
+munics_16 <- munics_16 %>%
+  filter(!(ine.prov.name == "Caceres" & name %in% delete_caceres))
+munics_18 <- munics_18 %>%
+  filter(!(ine.prov.name == "Caceres" & name %in% delete_caceres))
+munics_20 <- munics_20 %>%
+  filter(!(ine.prov.name == "Caceres" & name %in% delete_caceres))
+munics_22 <- munics_22 %>%
+  filter(!(ine.prov.name == "Caceres" & name %in% delete_caceres))
+
+
+# BADAJOZ
+replacements_badajoz <- c(
+  "Albuera, La" = "La Albuera",
+  "Carrascalejo, El" = "El Carrascalejo",
+  "Codosera, La" = "La Codosera",
+  "Coronada, La" = "La Coronada",
+  "Garrovilla, La" = "La Garrovilla",
+  "Haba, La" = "La Haba",
+  "Lapa, La" = "La Lapa",
+  "Morera, La" = "La Morera",
+  "Nava de Santiago, La" = "La Nava de Santiago",
+  "Parra, La" = "La Parra",
+  "Roca de la Sierra, La" = "La Roca de la Sierra",
+  "Santos de Maimona, Los" = "Los Santos de Maimona",
+  "Zarza, La" = "La Zarza",
+  "Guadiana del Caudillo" = "Guadiana"
+)
+delete_badajoz <- c(
+  "Reina"
+)
+munics_12 <- munics_12 %>%
+  filter(!(ine.prov.name == "Badajoz" & name %in% delete_badajoz))
+munics_14 <- munics_14 %>%
+  filter(!(ine.prov.name == "Badajoz" & name %in% delete_badajoz))
+munics_16 <- munics_16 %>%
+  filter(!(ine.prov.name == "Badajoz" & name %in% delete_badajoz))
+munics_18 <- munics_18 %>%
+  filter(!(ine.prov.name == "Badajoz" & name %in% delete_badajoz))
+munics_20 <- munics_20 %>%
+  filter(!(ine.prov.name == "Badajoz" & name %in% delete_badajoz))
+munics_22 <- munics_22 %>%
+  filter(!(ine.prov.name == "Badajoz" & name %in% delete_badajoz))
+
+
+# GUADALAJARA
+replacements_guadalajara <- c(
+  "Bodera, La" = "La Bodera",
+  "Cardoso de la Sierra, El" = "El Cardoso de la Sierra",
+  "Casar, El" = "El Casar",
+  "Cubillo de Uceda, El" = "El Cubillo de Uceda",
+  "Huerce, La" = "La Huerce",
+  "Inviernas, Las" = "Las Inviernas",
+  "Mierla, La" = "La Mierla",
+  "Miñosa, La" = "La Miñosa",
+  "Navas de Jadraque, Las" = "Las Navas de Jadraque",
+  "Olivar, El" = "El Olivar",
+  "Olmeda de Jadraque, La" = "La Olmeda de Jadraque",
+  "Ordial, El" = "El Ordial",
+  "Pedregal, El" = "El Pedregal",
+  "Pobo de Dueñas, El" = "El Pobo de Dueñas",
+  "Recuenco, El" = "El Recuenco",
+  "Sotillo, El" = "El Sotillo",
+  "Toba, La" = "La Toba",
+  "Yunta, La" = "La Yunta"
+)
+
+# TOLEDO
+replacements_toledo <- c(
+  "Campillo de la Jara, El" = "El Campillo de la Jara",
+  "Carpio de Tajo, El" = "El Carpio de Tajo",
+  "Casar de Escalona, El" = "El Casar de Escalona",
+  "Cerralbos, Los" = "Los Cerralbos",
+  "Estrella, La" = "La Estrella",
+  "Guardia, La" = "La Guardia",
+  "Herencias, Las" = "Las Herencias",
+  "Iglesuela, La" = "La Iglesuela del Tiétar",
+  "Mata, La" = "La Mata",
+  "Nava de Ricomalillo, La" = "La Nava de Ricomalillo",
+  "Navalmorales, Los" = "Los Navalmorales",
+  "Navalucillos, Los" = "Los Navalucillos",
+  "Puebla de Almoradiel, La" = "La Puebla de Almoradiel",
+  "Puebla de Montalbán, La" = "La Puebla de Montalbán",
+  "Pueblanueva, La" = "La Pueblanueva",
+  "Puente del Arzobispo, El" = "El Puente del Arzobispo",
+  "Real de San Vicente, El" = "El Real de San Vicente",
+  "Romeral, El" = "El Romeral",
+  "Toboso, El" = "El Toboso",
+  "Torre de Esteban Hambrán, La" = "La Torre de Esteban Hambrán",
+  "Ventas con Peña Aguilera, Las" = "Las Ventas con Peña Aguilera",
+  "Ventas de Retamosa, Las" = "Las Ventas de Retamosa",
+  "Ventas de San Julián, Las" = "Las Ventas de San Julián",
+  "Villa de Don Fadrique, La" = "La Villa de Don Fadrique",
+  "Viso de San Juan, El" = "El Viso de San Juan",
+  "Yébenes, Los" = "Los Yébenes"
+)
+
+# CUENCA
+replacements_cuenca <- c(
+  "Acebrón, El" = "El Acebrón",
+  "Alberca de Záncara, La" = "La Alberca de Záncara",
+  "Almarcha, La" = "La Almarcha",
+  "Cañavate, El" = "El Cañavate",
+  "Cierva, La" = "La Cierva",
+  "Frontera, La" = "La Frontera",
+  "Herrumblar, El" = "El Herrumblar",
+  "Hinojosa, La" = "La Hinojosa",
+  "Hinojosos, Los" = "Los Hinojosos",
+  "Hito, El" = "El Hito",
+  "Majadas, Las" = "Las Majadas",
+  "Mesas, Las" = "Las Mesas",
+  "Parra de las Vegas, La" = "La Parra de las Vegas",
+  "Pedernoso, El" = "El Pedernoso",
+  "Pedroñeras, Las" = "Las Pedroñeras",
+  "Peral, El" = "El Peral",
+  "Peraleja, La" = "La Peraleja",
+  "Pesquera, La" = "La Pesquera",
+  "Picazo, El" = "El Picazo",
+  "Pozuelo, El" = "El Pozuelo",
+  "Provencio, El" = "El Provencio",
+  "Valle de Altomira, El" = "El Valle de Altomira",
+  "Valeras, Las" = "Las Valeras",
+  "Valdecolmenas, Los" = "Los Valdecolmenas"
+)
+
+# CIUDAD-REAL
+replacements_ciudadreal <- c(
+  "Cortijos, Los" = "Los Cortijos",
+  "Labores, Las" = "Las Labores",
+  "Pozuelos de Calatrava, Los" = "Los Pozuelos de Calatrava",
+  "Solana, La" = "La Solana",
+  "Robledo, El" = "El Robledo"
+)
+
+# ALBACETE
+replacements_albacete <- c(
+  "Ballestero, El" = "El Ballestero",
+  "Bonillo, El" = "El Bonillo",
+  "Gineta, La" = "La Gineta",
+  "Herrera, La" = "La Herrera",
+  "Recueja, La" = "La Recueja",
+  "Roda, La" = "La Roda"
+)
+
+# CASTELLON 
+replacements_castellon <- c(
+  "Alcora, l'" = "l'Alcora",
+  "Coves de Vinromà, les" = "les Coves de Vinromà",
+  "Jana, la" = "la Jana",
+  "Llosa, la" = "la Llosa",
+  "Mata de Morella, la" = "la Mata de Morella",
+  "Pobla de Benifassà, la" = "la Pobla de Benifassà",
+  "Pobla Tornesa, la" = "la Pobla Tornesa",
+  "Salzadella, la" = "la Salzadella",
+  "Serratella, la" = "la Serratella",
+  "Toro, El" = "El Toro",
+  "Torre d'En Besora, la" = "la Torre d'En Besora",
+  "Torre d'en Doménec, la" = "la Torre d'en Doménec",
+  "Useras / Useres, les" = "Useras/les Useres",
+  "Vall d'Uixó, la" = "la Vall d'Uixó",
+  "Vilavella, la" = "la Vilavella",
+  "Alqueries, les / Alquerías del Niño Perdido" = "les Alqueries/Alquerías del Niño Perdido",
+  "Benicasim / Benicàssim" = "Benicasim/Benicàssim",
+  "Borriana / Burriana" = "Borriana/Burriana",
+  "Castellón de la Plana / Castelló de la Plana" = "Castelló de la Plana",
+  "Chilches / Xilxes" = "Chilches/Xilxes",
+  "Chodos / Xodos" = "Chodos/Xodos",
+  "les Alqueries/Alquerías del Niño Perdido" = "les Alqueries/Alquerías del Niño Perdido",
+  "Llucena / Lucena del Cid" = "Llucena/Lucena del Cid",
+  "Oropesa del Mar / Orpesa" = "Oropesa del Mar/Orpesa",
+  "Peníscola / Peñíscola" = "Peníscola/Peñíscola",
+  "Sant Jordi / San Jorge" = "Sant Jordi/San Jorge",
+  "Sueras / Suera" = "Sueras/Suera",
+  "Useras/les Useres" = "Useras/les Useres",
+  "Villafranca del Cid / Vilafranca" = "Vilafranca/Villafranca del Cid",
+  "Almazora" = "Almassora",
+  "Benlloch" = "Benlloc",
+  "Herbés" = "Herbers",
+  "Villafranca del Cid/Vilafranca" = "Vilafranca/Villafranca del Cid"
+)
+
+# VALENCIA
+replacements_valencia <- c(
+  "Alcúdia, l'" = "l'Alcúdia",
+  "Alcúdia de Crespins, l'" = "l'Alcúdia de Crespins",
+  "Alqueria de la Comtessa, l'" = "l'Alqueria de la Comtessa",
+  "Eliana, l'" = "l'Eliana",
+  "Ènova, l'" = "l'Énova",
+  "Font d'En Carròs, la" = "la Font d'en Carròs",
+  "Font de la Figuera, la" = "la Font de la Figuera",
+  "Granja de la Costera, la" = "la Granja de la Costera",
+  "Llosa de Ranes, la" = "la Llosa de Ranes",
+  "Olleria, l'" = "l'Olleria",
+  "Palomar, el" = "el Palomar",
+  "Pobla de Farnals, la" = "la Pobla de Farnals",
+  "Pobla del Duc, la" = "la Pobla del Duc",
+  "Pobla de Vallbona, la" = "la Pobla de Vallbona",
+  "Pobla Llarga, la" = "la Pobla Llarga",
+  "Puig de Santa Maria, el" = "el Puig de Santa Maria",
+  "Real de Gandia, el" = "el Real de Gandia",
+  "Yesa, La" = "La Yesa",
+  "Náquera" = "Nàquera/Náquera",
+  "Alboraia / Alboraya" = "Alboraia/Alboraya",
+  "Mogente / Moixent" = "Mogente/Moixent",
+  "Montitxelvo / Montichelvo" = "Montitxelvo/Montichelvo",
+  "Montroi / Montroy" = "Montroi/Montroy",
+  "Novelé / Novetlè" = "Novelé/Novetlè",
+  "Sagunto / Sagunt" = "Sagunto/Sagunt",
+  "Vilallonga / Villalonga" = "Vilallonga/Villalonga",
+  "Villanueva de Castellón" = "Castelló",
+  "Genovés" = "el Genovés",
+  "Rótova" = "Ròtova",
+  "Valencia" = "València",
+  "Algimia de Alfara" = "Algímia d'Alfara"
+)
+
+# ALICANTE
+replacements_alicante <- c(
+  "Atzúbia, l'" = "l'Atzúbia",
+  "Alfàs del Pi, l'" = "l'Alfàs del Pi",
+  "Alqueria d'Asnar, l'" = "l'Alqueria d'Asnar",
+  "Benitachell / Poble Nou de Benitatxell, el" = "Benitachell/el Poble Nou de Benitatxell",
+  "Campello, el" = "el Campello",
+  "Castell de Guadalest, el" = "el Castell de Guadalest",
+  "Fondó de les Neus, el / Hondón de las Nieves" = "el Fondó de les Neus/Hondón de las Nieves",
+  "Nucia, la" = "la Nucia",
+  "Pinós, el / Pinoso" = "el Pinós/Pinoso",
+  "Ràfol d'Almúnia, el" = "el Ràfol d'Almúnia",
+  "Romana, la" = "la Romana",
+  "Vall d'Alcalà, la" = "la Vall d'Alcalà",
+  "Vall d'Ebo, la" = "la Vall d'Ebo",
+  "Vall de Laguar, la" = "la Vall de Laguar",
+  "Verger, el" = "el Verger",
+  "Poblets, els" = "els Poblets",
+  "Vall de Gallinera" = "la Vall de Gallinera",
+  "Alcoy / Alcoi" = "Alcoy/Alcoi",
+  "Alicante / Alacant" = "Alicante/Alacant",
+  "el Fondó de les Neus / Hondón de las Nieves" = "el Fondó de les Neus/Hondón de las Nieves",
+  "el Pinós / Pinoso" = "el Pinós/Pinoso",
+  "Elche / Elx" = "Elche/Elx",
+  "Jávea / Xàbia" = "Jávea/Xàbia",
+  "Jijona / Xixona" = "Jijona/Xixona",
+  "Monóvar / Monòver" = "Monóvar/Monòver",
+  "San Vicente del Raspeig / Sant Vicent del Raspeig" = "San Vicente del Raspeig/Sant Vicent del Raspeig",
+  "Campo de Mirra / Camp de Mirra, el" = "Campo de Mirra/el Camp de Mirra",
+  "Facheca" = "Fageca",
+  "Lorcha / Orxa, l'" = "Lorcha/l'Orxa",
+  "Torremanzanas / Torre de les Maçanes, la" = "Torremanzanas/la Torre de les Maçanes",
+  "Villajoyosa / Vila Joiosa, la" = "Villajoyosa/la Vila Joiosa"
+
+)
+delete_alicante <- c(
+  "Montesinos, Los"
+)
+munics_12 <- munics_12 %>%
+  filter(!(ine.prov.name == "Alicante" & name %in% delete_alicante))
+munics_14 <- munics_14 %>%
+  filter(!(ine.prov.name == "Alicante" & name %in% delete_alicante))
+munics_16 <- munics_16 %>%
+  filter(!(ine.prov.name == "Alicante" & name %in% delete_alicante))
+munics_18 <- munics_18 %>%
+  filter(!(ine.prov.name == "Alicante" & name %in% delete_alicante))
+munics_20 <- munics_20 %>%
+  filter(!(ine.prov.name == "Alicante" & name %in% delete_alicante))
+munics_22 <- munics_22 %>%
+  filter(!(ine.prov.name == "Alicante" & name %in% delete_alicante))
+
+
+# HUELVA
+replacements_huelva <- c(
+  "Almendro, El" = "El Almendro",
+  "Campillo, El" = "El Campillo",
+  "Cerro de Andévalo, El" = "El Cerro de Andévalo",
+  "Granada de Río-Tinto, La" = "La Granada de Río-Tinto",
+  "Granado, El" = "El Granado",
+  "Marines, Los" = "Los Marines",
+  "Nava, La" = "La Nava",
+  "Palma del Condado, La" = "La Palma del Condado",
+  "Zarza-Perrunal, La" = "La Zarza-Perrunal"
+)
+
+# SEVILLA
+replacements_sevilla <- c(
+  "Algaba, La" = "La Algaba",
+  "Cabezas de San Juan, Las" = "Las Cabezas de San Juan",
+  "Campana, La" = "La Campana",
+  "Castillo de las Guardas, El" = "El Castillo de las Guardas",
+  "Coronil, El" = "El Coronil",
+  "Corrales, Los" = "Los Corrales",
+  "Garrobo, El" = "El Garrobo",
+  "Luisiana, La" = "La Luisiana",
+  "Madroño, El" = "El Madroño",
+  "Molares, Los" = "Los Molares",
+  "Navas de la Concepción, Las" = "Las Navas de la Concepción",
+  "Palacios y Villafranca, Los" = "Los Palacios y Villafranca",
+  "Pedroso, El" = "El Pedroso",
+  "Puebla de Cazalla, La" = "La Puebla de Cazalla",
+  "Puebla de los Infantes, La" = "La Puebla de los Infantes",
+  "Puebla del Río, La" = "La Puebla del Río",
+  "Real de la Jara, El" = "El Real de la Jara",
+  "Rinconada, La" = "La Rinconada",
+  "Roda de Andalucía, La" = "La Roda de Andalucía",
+  "Ronquillo, El" = "El Ronquillo",
+  "Rubio, El" = "El Rubio",
+  "Saucejo, El" = "El Saucejo",
+  "Viso del Alcor, El" = "El Viso del Alcor",
+  "Cuervo de Sevilla, El" = "El Cuervo de Sevilla"
+)
+delete_sevilla <- c(
+  "Palmar de Troya, El"
+)
+munics_12 <- munics_12 %>%
+  filter(!(ine.prov.name == "Sevilla" & name %in% delete_sevilla))
+
+munics_14 <- munics_14 %>%
+  filter(!(ine.prov.name == "Sevilla" & name %in% delete_sevilla))
+
+munics_16 <- munics_16 %>%
+  filter(!(ine.prov.name == "Sevilla" & name %in% delete_sevilla))
+
+munics_18 <- munics_18 %>%
+  filter(!(ine.prov.name == "Sevilla" & name %in% delete_sevilla))
+
+munics_20 <- munics_20 %>%
+  filter(!(ine.prov.name == "Sevilla" & name %in% delete_sevilla))
+
+munics_22 <- munics_22 %>%
+  filter(!(ine.prov.name == "Sevilla" & name %in% delete_sevilla))
+
+# CORDOBA
+replacements_cordoba <- c(
+  "Blázquez, Los" = "Los Blázquez",
+  "Carlota, La" = "La Carlota",
+  "Carpio, El" = "El Carpio",
+  "Granjuela, La" = "La Granjuela",
+  "Guijo, El" = "El Guijo",
+  "Rambla, La" = "La Rambla",
+  "Victoria, La" = "La Victoria",
+  "Viso, El" = "El Viso"
+)
+delete_cordoba <- c(
+  "Fuente Carreteros",
+  "Guijarrosa, La"
+)
+munics_12 <- munics_12 %>%
+  filter(!(ine.prov.name == "Cordoba" & name %in% delete_cordoba))
+
+munics_14 <- munics_14 %>%
+  filter(!(ine.prov.name == "Cordoba" & name %in% delete_cordoba))
+
+munics_16 <- munics_16 %>%
+  filter(!(ine.prov.name == "Cordoba" & name %in% delete_cordoba))
+
+munics_18 <- munics_18 %>%
+  filter(!(ine.prov.name == "Cordoba" & name %in% delete_cordoba))
+
+munics_20 <- munics_20 %>%
+  filter(!(ine.prov.name == "Cordoba" & name %in% delete_cordoba))
+
+munics_22 <- munics_22 %>%
+  filter(!(ine.prov.name == "Cordoba" & name %in% delete_cordoba))
+
+# JAEN
+replacements_jaen <- c(
+  "Carolina, La" = "La Carolina",
+  "Guardia de Jaén, La" = "La Guardia de Jaén",
+  "Iruela, La" = "La Iruela",
+  "Puerta de Segura, La" = "La Puerta de Segura",
+  "Villares, Los" = "Los Villares"
+)
+
+# CADIZ
+replacements_cadiz <- c(
+  "Barrios, Los" = "Los Barrios",
+  "Bosque, El" = "El Bosque",
+  "Gastor, El" = "El Gastor",
+  "Línea de la Concepción, La" = "La Línea de la Concepción",
+  "Puerto de Santa María, El" = "El Puerto de Santa María",
+  "Medina-Sidonia" = "Medina Sidonia"
+)
+
+# MALAGA
+delete_malaga <- c(
+  "Serrato"
+)
+munics_12 <- munics_12 %>%
+  filter(!(ine.prov.name == "Malaga" & name %in% delete_malaga))
+
+munics_14 <- munics_14 %>%
+  filter(!(ine.prov.name == "Malaga" & name %in% delete_malaga))
+
+munics_16 <- munics_16 %>%
+  filter(!(ine.prov.name == "Malaga" & name %in% delete_malaga))
+
+munics_18 <- munics_18 %>%
+  filter(!(ine.prov.name == "Malaga" & name %in% delete_malaga))
+
+munics_20 <- munics_20 %>%
+  filter(!(ine.prov.name == "Malaga" & name %in% delete_malaga))
+
+munics_22 <- munics_22 %>%
+  filter(!(ine.prov.name == "Malaga" & name %in% delete_malaga))
+
+# GRANADA
+replacements_granada <- c(
+  "Calahorra, La" = "La Calahorra",
+  "Malahá, La" = "La Malahá",
+  "Peza, La" = "La Peza",
+  "Zubia, La" = "La Zubia",
+  "Taha, La" = "La Taha",
+  "Valle, El" = "El Valle",
+  "Gabias, Las" = "Las Gabias",
+  "Guájares, Los" = "Los Guájares",
+  "Pinar, El" = "El Pinar",
+  "Jerez del Marquesado" = "Jérez del Marquesado"
+)
+delete_granada <- c(
+  "Dehesas Viejas",
+  "Domingo Pérez de Granada",
+  "Fornes",
+  "Játar"
+)
+munics_12 <- munics_12 %>%
+  filter(!(ine.prov.name == "Granada" & name %in% delete_granada))
+
+munics_14 <- munics_14 %>%
+  filter(!(ine.prov.name == "Granada" & name %in% delete_granada))
+
+munics_16 <- munics_16 %>%
+  filter(!(ine.prov.name == "Granada" & name %in% delete_granada))
+
+munics_18 <- munics_18 %>%
+  filter(!(ine.prov.name == "Granada" & name %in% delete_granada))
+
+munics_20 <- munics_20 %>%
+  filter(!(ine.prov.name == "Granada" & name %in% delete_granada))
+
+munics_22 <- munics_22 %>%
+  filter(!(ine.prov.name == "Granada" & name %in% delete_granada))
+
+# ALMERIA
+replacements_almeria <- c(
+  "Gallardos, Los" = "Los Gallardos",
+  "Tres Villas, Las" = "Las Tres Villas",
+  "Ejido, El" = "El Ejido",
+  "Mojonera, La" = "La Mojonera",
+  "Albánchez" = "Albanchez"
+)
+
+# MURCIA
+replacements_murcia <- c(
+  "Torres de Cotillas, Las" = "Las Torres de Cotillas",
+  "Unión, La" = "La Unión",
+  "Alcázares, Los" = "Los Alcázares"
+)
+
+# BALEARES
+replacements_baleares <- c(
+  "Mercadal, Es" = "Es Mercadal",
+  "Pobla, Sa" = "Sa Pobla",
+  "Salines, Ses" = "ses Salines",
+  "Castell, Es" = "es Castell",
+  "Migjorn Gran, Es" = "Es Migjorn Gran",
+  "Palma de Mallorca" = "Palma"
+)
+
+# LAS-PALMAS
+replacements_laspalmas <- c(
+  "Oliva, La" = "La Oliva",
+  "Palmas de Gran Canaria, Las" = "Las Palmas de Gran Canaria",
+  "Aldea de San Nicolás, La" = "La Aldea de San Nicolás"
+)
+
+# TENERIFE
+replacements_tenerife <- c(
+  "Guancha, La" = "La Guancha",
+  "Llanos de Aridane, Los" = "Los Llanos de Aridane",
+  "Matanza de Acentejo, La" = "La Matanza de Acentejo",
+  "Orotava, La" = "La Orotava",
+  "Paso, El" = "El Paso",
+  "Realejos, Los" = "Los Realejos",
+  "Rosario, El" = "El Rosario",
+  "Sauzal, El" = "El Sauzal",
+  "Silos, Los" = "Los Silos",
+  "Tanque, El" = "El Tanque",
+  "Victoria de Acentejo, La" = "La Victoria de Acentejo",
+  "Pinar de El Hierro, El" = "El Pinar de El Hierro"
+)
+
+# CEUTA
+replacements_ceuta <- c()
+
+# MELILLA
+replacements_melilla <- c()
+
+provinces <- as.character(sort(unique(munics_12$ine.prov.name)))
+replacements <- list(
+  replacements_albacete,
+  replacements_alicante,
+  replacements_almeria,
+  replacements_alava,
+  replacements_asturias,
+  replacements_avila,
+  replacements_badajoz,
+  replacements_baleares,
+  replacements_barcelona,
+  replacements_bizkaia,
+  replacements_burgos,
+  replacements_caceres,
+  replacements_cadiz,
+  replacements_cantabria,
+  replacements_castellon,
+  replacements_ceuta,
+  replacements_ciudadreal,
+  replacements_cordoba,
+  replacements_coruna,
+  replacements_cuenca,
+  replacements_gipuzkoa,
+  replacements_girona,
+  replacements_granada,
+  replacements_guadalajara,
+  replacements_huelva,
+  replacements_huesca,
+  replacements_jaen,
+  replacements_leon,
+  replacements_lleida,
+  replacements_lugo,
+  replacements_madrid,
+  replacements_malaga,
+  replacements_melilla,
+  replacements_murcia,
+  replacements_navarra,
+  replacements_ourense,
+  replacements_palencia,
+  replacements_laspalmas,
+  replacements_pontevedra,
+  replacements_la_rioja,
+  replacements_salamanca,
+  replacements_tenerife,
+  replacements_segovia,
+  replacements_sevilla,
+  replacements_soria,
+  replacements_tarragona,
+  replacements_teruel,
+  replacements_toledo,
+  replacements_valencia,
+  replacements_valladolid,
+  replacements_zamora,
+  replacements_zaragoza
+)
+
+
+
+for (i in 1:length(provinces)){
+  replace <- replacements[[i]]
+  province <- provinces[i]
+  #2012
+  for (j in 1:length(munics_12[munics_12$ine.prov.name==province,]$name)) {
+  if (munics_12[munics_12$ine.prov.name==province,]$name[j] %in% names(replace)) {
+    
+    munics_12[munics_12$ine.prov.name==province,]$name[j] <-
+      replace[munics_12[munics_12$ine.prov.name==province,]$name[j]]
+  }
+  }
+  #2014
+  for (j in 1:length(munics_14[munics_14$ine.prov.name==province,]$name)) {
+  if (munics_14[munics_14$ine.prov.name==province,]$name[j] %in% names(replace)) {
+    
+    munics_14[munics_14$ine.prov.name==province,]$name[j] <-
+      replace[munics_14[munics_14$ine.prov.name==province,]$name[j]]
+  }
+  }
+  #2016
+    for (j in 1:length(munics_16[munics_16$ine.prov.name==province,]$name)) {
+  if (munics_16[munics_16$ine.prov.name==province,]$name[j] %in% names(replace)) {
+    
+    munics_16[munics_16$ine.prov.name==province,]$name[j] <-
+      replace[munics_16[munics_16$ine.prov.name==province,]$name[j]]
+  }
+  }
+  #2018
+    for (j in 1:length(munics_18[munics_18$ine.prov.name==province,]$name)) {
+  if (munics_18[munics_18$ine.prov.name==province,]$name[j] %in% names(replace)) {
+    
+    munics_18[munics_18$ine.prov.name==province,]$name[j] <-
+      replace[munics_18[munics_18$ine.prov.name==province,]$name[j]]
+  }
+  }
+  #2020
+    for (j in 1:length(munics_20[munics_20$ine.prov.name==province,]$name)) {
+  if (munics_20[munics_20$ine.prov.name==province,]$name[j] %in% names(replace)) {
+    
+    munics_20[munics_20$ine.prov.name==province,]$name[j] <-
+      replace[munics_20[munics_20$ine.prov.name==province,]$name[j]]
+  }
+  }
+  #2022
+    for (j in 1:length(munics_22[munics_22$ine.prov.name==province,]$name)) {
+  if (munics_22[munics_22$ine.prov.name==province,]$name[j] %in% names(replace)) {
+    
+    munics_22[munics_22$ine.prov.name==province,]$name[j] <-
+      replace[munics_22[munics_22$ine.prov.name==province,]$name[j]]
+  }
+  }
+}
+
+###############################################################
+# LOCATION INDEX OF THE CENTENARIAN POPULATION (MUNICIPALITIES)
+###############################################################
+# Create 3 new variables: Total>65, Total>85, Total>100
+data$Total_65 <- data$m_65_69+data$m_70_74+data$m_75_79+data$m_80_84+
+  data$m_85_89+data$m_90_94+data$m_95_99+data$m_100+data$f_65_69+
+  data$f_70_74+data$f_75_79+data$f_80_84+data$f_85_89+data$f_90_94+
+  data$f_95_99+data$f_100
+
+data$Total_85 <- data$m_85_89+data$m_90_94+data$m_95_99+data$m_100+
+  +data$f_85_89+data$f_90_94+data$f_95_99+data$f_100
+
+data$Total_100 <- data$m_100+data$f_100
+
+# Compute IL
+# Summarize total inhabitants by municipality and Year
+habs_munic <- data %>%
+  group_by(PROV, MUNICIPIO, year) %>%
+  summarize(total = sum(Total_habs),
+            older_65 = sum(Total_65),
+            older_85 = sum(Total_85),
+            older_100 = sum(Total_100))
+# 2012
+munic_12 <- habs_munic[habs_munic$year==2012,]
+total_C12 <- sum(munic_12$older_100)
+total12 <- sum(munic_12$total)
+munic_12$IL <- (munic_12$older_100/total_C12)/(munic_12$total/total12)
+print(munic_12)
+# Check the distribution of IL
+hist(munic_12$IL, 
+     breaks=30,
+     main = "Histogram of IL",
+     xlab = "IL",
+     ylab = "Frequency",
+     col = "blue", # Color of the bars
+     border = "black") # Border color of the bars
+# 2014
+munic_14 <- habs_munic[habs_munic$year==2014,]
+total_C14 <- sum(munic_14$older_100)
+total14 <- sum(munic_14$total)
+munic_14$IL <- (munic_14$older_100/total_C14)/(munic_14$total/total14)
+# 2016
+munic_16 <- habs_munic[habs_munic$year==2016,]
+total_C16 <- sum(munic_16$older_100)
+total16 <- sum(munic_16$total)
+munic_16$IL <- (munic_16$older_100/total_C16)/(munic_16$total/total16)
+# 2018
+munic_18 <- habs_munic[habs_munic$year==2018,]
+total_C18 <- sum(munic_18$older_100)
+total18 <- sum(munic_18$total)
+munic_18$IL <- (munic_18$older_100/total_C18)/(munic_18$total/total18)
+# 2020
+munic_20 <- habs_munic[habs_munic$year==2020,]
+total_C20 <- sum(munic_20$older_100)
+total20 <- sum(munic_20$total)
+munic_20$IL <- (munic_20$older_100/total_C20)/(munic_20$total/total20)
+# 2022
+munic_22 <- habs_munic[habs_munic$year==2022,]
+total_C22 <- sum(munic_22$older_100)
+total22 <- sum(munic_22$total)
+munic_22$IL <- (munic_22$older_100/total_C22)/(munic_22$total/total22)
+
+
+
