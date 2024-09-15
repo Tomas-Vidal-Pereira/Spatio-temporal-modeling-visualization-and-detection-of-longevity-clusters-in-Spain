@@ -5115,3 +5115,1290 @@ ggplot(data_long, aes(x = Year, y = LocationIndex, color = Province, group = Pro
     legend.text = element_text(size = 18),  
     legend.title = element_text(size = 18)    
   )
+
+#########################################################################
+# CLUSTERIZATION ALGORITHM
+#########################################################################
+
+# Longevity metric
+
+longevity_dist <- function(IL, IL2, IL3, SR_65, SR_85, SR_100, i) {
+  distance <- 0
+  variables <- list(IL, IL2, IL3, SR_65, SR_85, SR_100)
+  for (var in variables) {
+    if (!is.nan(var[i])) {
+      distance <- distance + (var - var[i])^2
+    }
+  }
+  # Return the square root of the sum of squared differences
+  return(sqrt(distance))
+}
+
+# Clusterization Function
+
+stdbscan <- function(x, y, time, eps, eps2, eps3, minpts, 
+                             IL, IL2, IL3,SR_65,SR_85,SR_100) { 
+  n <- length(x)
+  
+  # Initialize vectors for clusters, class density, and core points
+  cv <- integer(n)
+  isseed <- logical(n)
+  cn <- 0
+  
+  for (i in 1:n) {
+    if (cv[i] == 0) {
+      # Calculate the distances
+      spatial_distance <- sqrt((x - x[i])^2 + (y - y[i])^2)
+      time_distance <- abs(time - time[i])
+      longevity_distance <- longevity_dist(IL,IL2,IL3,SR_65,SR_85,SR_100,i)
+ 
+      reachables <- which(spatial_distance <= eps & 
+                      time_distance <= eps2 &
+                      longevity_distance <= eps3)
+      
+      if (length(reachables) < minpts) {
+        cv[i] <- -1  # Mark as noise
+      } else {
+        cn <- cn + 1
+        cv[i] <- cn
+        isseed[i] <- TRUE
+        reachables <- setdiff(reachables, i)
+        while (length(reachables)) {
+          cv[reachables] <- cn
+          new_reachables <- integer()
+          for (j in reachables) {
+            jspatial_distance <- sqrt((x - x[j])^2 + (y - y[j])^2)
+            jtime_distance <- abs(time - time[j])
+            jlongevity_distance <- longevity_dist(IL,IL2,IL3,SR_65,SR_85,SR_100,j)
+            
+            jreachables <- which(jspatial_distance <= eps & 
+                       jtime_distance <= eps2 &
+                       jlongevity_distance <= eps3)
+            
+            if (length(jreachables) >= minpts) {
+              isseed[j] <- TRUE
+              cv[jreachables[cv[jreachables] < 0]] <- cn
+              new_reachables <- c(new_reachables, jreachables[cv[jreachables] == 0])
+            }
+          }
+          reachables <- unique(new_reachables)
+        }
+      }
+    }
+  }
+  
+  if (any(cv == -1)) {
+    cv[cv == -1] <- 0
+  }
+  
+  out <- list(cluster = cv, eps = eps, eps2=eps2, eps3=eps3, minpts = minpts)
+  if (cn > 0) {
+    out$isseed <- isseed
+  }
+  class(out) <- "stdbscan"
+  return(out)
+}
+
+# Create an appropriate dataframe with the features that we need
+munic <- data %>%
+  group_by(PROV, MUNICIPIO, year) %>%
+  summarize(total = sum(Total_habs),
+            older_65 = sum(Total_65),
+            older_85 = sum(Total_85),
+            older_100 = sum(Total_100),
+            olderm_65 = sum(Totalm_65),
+            olderf_65 = sum(Totalf_65),
+            olderm_85 = sum(Totalm_85),
+            olderf_85 = sum(Totalf_85),
+            olderm_100 = sum(m_100),
+            olderf_100 = sum(f_100),
+            Coord_X = mean(Coord_X_ce),
+            Coord_Y = mean(Coord_Y_ce))
+# Compute IL for every year
+# Total centenarians and inhabitants for each year
+total_C12 <- sum(munic$older_100[munic$year == 2012])
+total12 <- sum(munic$total[munic$year == 2012])
+total_C14 <- sum(munic$older_100[munic$year == 2014])
+total14 <- sum(munic$total[munic$year == 2014])
+total_C16 <- sum(munic$older_100[munic$year == 2016])
+total16 <- sum(munic$total[munic$year == 2016])
+total_C18 <- sum(munic$older_100[munic$year == 2018])
+total18 <- sum(munic$total[munic$year == 2018])
+total_C20 <- sum(munic$older_100[munic$year == 2020])
+total20 <- sum(munic$total[munic$year == 2020])
+total_C22 <- sum(munic$older_100[munic$year == 2022])
+total22 <- sum(munic$total[munic$year == 2022])
+
+# Create the new column IL with NA values to fill in later
+munic$IL <- NA
+
+# Apply the formula for each year
+munic$IL[munic$year == 2012] <- (munic$older_100[munic$year == 2012] / total_C12) / (munic$total[munic$year == 2012] / total12)
+
+munic$IL[munic$year == 2014] <- (munic$older_100[munic$year == 2014] / total_C14) / (munic$total[munic$year == 2014] / total14)
+
+munic$IL[munic$year == 2016] <- (munic$older_100[munic$year == 2016] / total_C16) / (munic$total[munic$year == 2016] / total16)
+
+munic$IL[munic$year == 2018] <- (munic$older_100[munic$year == 2018] / total_C18) / (munic$total[munic$year == 2018] / total18)
+
+munic$IL[munic$year == 2020] <- (munic$older_100[munic$year == 2020] / total_C20) / (munic$total[munic$year == 2020] / total20)
+
+munic$IL[munic$year == 2022] <- (munic$older_100[munic$year == 2022] / total_C22) / (munic$total[munic$year == 2022] / total22)
+
+
+# Compute IL(>65) for every year
+total_S12 <- sum(munic$older_65[munic$year == 2012])
+total_S14 <- sum(munic$older_65[munic$year == 2014])
+total_S16 <- sum(munic$older_65[munic$year == 2016])
+total_S18 <- sum(munic$older_65[munic$year == 2018])
+total_S20 <- sum(munic$older_65[munic$year == 2020])
+total_S22 <- sum(munic$older_65[munic$year == 2022])
+
+munic$IL2 <- NA
+munic$IL2[munic$year == 2012] <- (munic$older_100[munic$year == 2012] / total_C12) / (munic$older_65[munic$year == 2012] / total_S12)
+
+munic$IL2[munic$year == 2014] <- (munic$older_100[munic$year == 2014] / total_C14) / (munic$older_65[munic$year == 2014] / total_S14)
+
+munic$IL2[munic$year == 2016] <- (munic$older_100[munic$year == 2016] / total_C16) / (munic$older_65[munic$year == 2016] / total_S16)
+
+munic$IL2[munic$year == 2018] <- (munic$older_100[munic$year == 2018] / total_C18) / (munic$older_65[munic$year == 2018] / total_S18)
+
+munic$IL2[munic$year == 2020] <- (munic$older_100[munic$year == 2020] / total_C20) / (munic$older_65[munic$year == 2020] / total_S20)
+
+munic$IL2[munic$year == 2022] <- (munic$older_100[munic$year == 2022] / total_C22) / (munic$older_65[munic$year == 2022] / total_S22)
+
+# Compute IL(>85) for every year
+total_O12 <- sum(munic$older_85[munic$year == 2012])
+total_O14 <- sum(munic$older_85[munic$year == 2014])
+total_O16 <- sum(munic$older_85[munic$year == 2016])
+total_O18 <- sum(munic$older_85[munic$year == 2018])
+total_O20 <- sum(munic$older_85[munic$year == 2020])
+total_O22 <- sum(munic$older_85[munic$year == 2022])
+
+munic$IL3 <- NA
+
+munic$IL3[munic$year == 2012] <- (munic$older_100[munic$year == 2012]/total_C12)/(munic$older_85[munic$year == 2012]/total_O12)
+
+munic$IL3[munic$year == 2014] <- (munic$older_100[munic$year == 2014] / total_C14) / (munic$older_85[munic$year == 2014] / total_O14)
+
+munic$IL3[munic$year == 2016] <- (munic$older_100[munic$year == 2016] / total_C16) / (munic$older_85[munic$year == 2016] / total_O16)
+
+munic$IL3[munic$year == 2018] <- (munic$older_100[munic$year == 2018] / total_C18) / (munic$older_85[munic$year == 2018] / total_O18)
+
+munic$IL3[munic$year == 2020] <- (munic$older_100[munic$year == 2020] / total_C20) / (munic$older_85[munic$year == 2020] / total_O20)
+
+munic$IL3[munic$year == 2022] <- (munic$older_100[munic$year == 2022] / total_C22) / (munic$older_85[munic$year == 2022] / total_O22)
+
+# Compute SR(>65)
+munic$SR_65 <- munic$olderm_65/munic$olderf_65*100
+# Compute SR(>85)
+munic$SR_85 <- munic$olderm_85/munic$olderf_85*100
+# Compute SR(>100)
+munic$SR_100 <- munic$olderm_100/munic$olderf_100*100
+
+x <- munic$Coord_X
+y <- munic$Coord_Y
+time <- munic$year
+IL <- munic$IL
+IL2 <- munic$IL2
+IL3 <- munic$IL3
+SR_65 <- munic$SR_65
+SR_85 <- munic$SR_85
+SR_100 <- munic$SR_100
+
+### Spatial tuning
+
+
+eps <- 2.5  # spatial
+eps2 <- 2   # temporal
+eps3 <- 10 # longevity
+minpts <- 100 # Minimum number of points
+
+result1 <- stdbscan(x,y,time,eps,eps2,eps3,minpts,IL,IL2,IL3,SR_65,SR_85,SR_100)
+unique(result1$cluster)
+
+eps <- 2  # spatial
+eps2 <- 2   # temporal
+eps3 <- 10 # longevity
+minpts <- 100 # Minimum number of points
+
+result2 <- stdbscan(x,y,time,eps,eps2,eps3,minpts,IL,IL2,IL3,SR_65,SR_85,SR_100)
+unique(result2$cluster)
+
+eps <- 1.5  # spatial
+eps2 <- 2   # temporal
+eps3 <- 10 # longevity
+minpts <- 100 # Minimum number of points
+
+result3 <- stdbscan(x,y,time,eps,eps2,eps3,minpts,IL,IL2,IL3,SR_65,SR_85,SR_100)
+unique(result3$cluster)
+
+eps <- 1  # spatial
+eps2 <- 2   # temporal
+eps3 <- 10 # longevity
+minpts <- 100 # Minimum number of points
+
+result4 <- stdbscan(x,y,time,eps,eps2,eps3,minpts,IL,IL2,IL3,SR_65,SR_85,SR_100)
+unique(result4$cluster)
+
+eps <- 0.5  # spatial
+eps2 <- 2   # temporal
+eps3 <- 10 # longevity
+minpts <- 100 # Minimum number of points
+
+result5 <- stdbscan(x,y,time,eps,eps2,eps3,minpts,IL,IL2,IL3,SR_65,SR_85,SR_100)
+unique(result5$cluster)
+
+eps <- 2.25  # spatial
+eps2 <- 2   # temporal
+eps3 <- 10 # longevity
+minpts <- 100 # Minimum number of points
+
+result6 <- stdbscan(x,y,time,eps,eps2,eps3,minpts,IL,IL2,IL3,SR_65,SR_85,SR_100)
+unique(result6$cluster)
+
+eps <- 2.75  # spatial
+eps2 <- 2   # temporal
+eps3 <- 10 # longevity
+minpts <- 100 # Minimum number of points
+
+result7 <- stdbscan(x,y,time,eps,eps2,eps3,minpts,IL,IL2,IL3,SR_65,SR_85,SR_100)
+unique(result7$cluster)
+
+eps <- 3  # spatial
+eps2 <- 2   # temporal
+eps3 <- 10 # longevity
+minpts <- 100 # Minimum number of points
+
+result8 <- stdbscan(x,y,time,eps,eps2,eps3,minpts,IL,IL2,IL3,SR_65,SR_85,SR_100)
+unique(result8$cluster)
+
+eps <- 3.25  # spatial
+eps2 <- 2   # temporal
+eps3 <- 10 # longevity
+minpts <- 100 # Minimum number of points
+
+result9 <- stdbscan(x,y,time,eps,eps2,eps3,minpts,IL,IL2,IL3,SR_65,SR_85,SR_100)
+unique(result9$cluster)
+
+eps <- 3.5  # spatial
+eps2 <- 2   # temporal
+eps3 <- 10 # longevity
+minpts <- 100 # Minimum number of points
+
+result10 <- stdbscan(x,y,time,eps,eps2,eps3,minpts,IL,IL2,IL3,SR_65,SR_85,SR_100)
+unique(result10$cluster)
+
+eps <- 3.75  # spatial
+eps2 <- 2   # temporal
+eps3 <- 10 # longevity
+minpts <- 100 # Minimum number of points
+
+result11 <- stdbscan(x,y,time,eps,eps2,eps3,minpts,IL,IL2,IL3,SR_65,SR_85,SR_100)
+unique(result11$cluster)
+
+eps <- 4  # spatial
+eps2 <- 2   # temporal
+eps3 <- 10 # longevity
+minpts <- 100 # Minimum number of points
+
+result12 <- stdbscan(x,y,time,eps,eps2,eps3,minpts,IL,IL2,IL3,SR_65,SR_85,SR_100)
+unique(result12$cluster)
+
+eps <- 5  # spatial
+eps2 <- 2   # temporal
+eps3 <- 10 # longevity
+minpts <- 100 # Minimum number of points
+
+result13 <- stdbscan(x,y,time,eps,eps2,eps3,minpts,IL,IL2,IL3,SR_65,SR_85,SR_100)
+unique(result13$cluster)
+
+eps <- 6  # spatial
+eps2 <- 2   # temporal
+eps3 <- 10 # longevity
+minpts <- 100 # Minimum number of points
+
+result14 <- stdbscan(x,y,time,eps,eps2,eps3,minpts,IL,IL2,IL3,SR_65,SR_85,SR_100)
+unique(result14$cluster)
+
+eps <- 7  # spatial
+eps2 <- 2   # temporal
+eps3 <- 10 # longevity
+minpts <- 100 # Minimum number of points
+
+result15 <- stdbscan(x,y,time,eps,eps2,eps3,minpts,IL,IL2,IL3,SR_65,SR_85,SR_100)
+unique(result15$cluster)
+
+eps <- 8  # spatial
+eps2 <- 2   # temporal
+eps3 <- 10 # longevity
+minpts <- 100 # Minimum number of points
+
+result16 <- stdbscan(x,y,time,eps,eps2,eps3,minpts,IL,IL2,IL3,SR_65,SR_85,SR_100)
+unique(result16$cluster)
+
+eps <- 9  # spatial
+eps2 <- 2   # temporal
+eps3 <- 10 # longevity
+minpts <- 100 # Minimum number of points
+
+result17 <- stdbscan(x,y,time,eps,eps2,eps3,minpts,IL,IL2,IL3,SR_65,SR_85,SR_100)
+unique(result17$cluster)
+
+eps <- 10  # spatial
+eps2 <- 2   # temporal
+eps3 <- 10 # longevity
+minpts <- 100 # Minimum number of points
+
+result18 <- stdbscan(x,y,time,eps,eps2,eps3,minpts,IL,IL2,IL3,SR_65,SR_85,SR_100)
+unique(result18$cluster)
+
+eps <- 1e4  # spatial
+eps2 <- 2   # temporal
+eps3 <- 10 # longevity
+minpts <- 100 # Minimum number of points
+
+result19 <- stdbscan(x,y,time,eps,eps2,eps3,minpts,IL,IL2,IL3,SR_65,SR_85,SR_100)
+unique(result19$cluster)
+
+parameters <- data.frame(
+  Eps = c(2.5,2,1.5,1,0.5,2.25,2.75,3,3.25,3.5,3.75,4,5,6,7,8,9,10,1e4),
+  Eps2 = c(rep(2,19)),
+  Eps3 = c(rep(10,19)),
+  Minpts = c(rep(100,19))
+)
+zeros <- c(
+  sum(result1$cluster==0),
+  sum(result2$cluster==0),
+  sum(result3$cluster==0),
+  sum(result4$cluster==0),
+  sum(result5$cluster==0),
+  sum(result6$cluster==0),
+  sum(result7$cluster==0),
+  sum(result8$cluster==0),
+  sum(result9$cluster==0),
+  sum(result10$cluster==0),
+  sum(result11$cluster==0),
+  sum(result12$cluster==0),
+  sum(result13$cluster==0),
+  sum(result14$cluster==0),
+  sum(result15$cluster==0),
+  sum(result16$cluster==0),
+  sum(result17$cluster==0),
+  sum(result18$cluster==0),
+  sum(result19$cluster==0)
+)
+ones <- c(
+  sum(result1$cluster==1),
+  sum(result2$cluster==1),
+  sum(result3$cluster==1),
+  sum(result4$cluster==1),
+  sum(result5$cluster==1),
+  sum(result6$cluster==1),
+  sum(result7$cluster==1),
+  sum(result8$cluster==1),
+  sum(result9$cluster==1),
+  sum(result10$cluster==1),
+  sum(result11$cluster==1),
+  sum(result12$cluster==1),
+  sum(result13$cluster==1),
+  sum(result14$cluster==1),
+  sum(result15$cluster==1),
+  sum(result16$cluster==1),
+  sum(result17$cluster==1),
+  sum(result18$cluster==1),
+  sum(result19$cluster==1)
+)
+twos <- c(
+  sum(result1$cluster==2),
+  sum(result2$cluster==2),
+  sum(result3$cluster==2),
+  sum(result4$cluster==2),
+  sum(result5$cluster==2),
+  sum(result6$cluster==2),
+  sum(result7$cluster==2),
+  sum(result8$cluster==2),
+  sum(result9$cluster==2),
+  sum(result10$cluster==2),
+  sum(result11$cluster==2),
+  sum(result12$cluster==2),
+  sum(result13$cluster==2),
+  sum(result14$cluster==2),
+  sum(result15$cluster==2),
+  sum(result16$cluster==2),
+  sum(result17$cluster==2),
+  sum(result18$cluster==2),
+  sum(result19$cluster==2)
+)
+threes <- c(
+  sum(result1$cluster==3),
+  sum(result2$cluster==3),
+  sum(result3$cluster==3),
+  sum(result4$cluster==3),
+  sum(result5$cluster==3),
+  sum(result6$cluster==3),
+  sum(result7$cluster==3),
+  sum(result8$cluster==3),
+  sum(result9$cluster==3),
+  sum(result10$cluster==3),
+  sum(result11$cluster==3),
+  sum(result12$cluster==3),
+  sum(result13$cluster==3),
+  sum(result14$cluster==3),
+  sum(result15$cluster==3),
+  sum(result16$cluster==3),
+  sum(result17$cluster==3),
+  sum(result18$cluster==3),
+  sum(result19$cluster==3)
+)
+fours <- c(
+  sum(result1$cluster==4),
+  sum(result2$cluster==4),
+  sum(result3$cluster==4),
+  sum(result4$cluster==4),
+  sum(result5$cluster==4),
+  sum(result6$cluster==4),
+  sum(result7$cluster==4),
+  sum(result8$cluster==4),
+  sum(result9$cluster==4),
+  sum(result10$cluster==4),
+  sum(result11$cluster==4),
+  sum(result12$cluster==4),
+  sum(result13$cluster==4),
+  sum(result14$cluster==4),
+  sum(result15$cluster==4),
+  sum(result16$cluster==4),
+  sum(result17$cluster==4),
+  sum(result18$cluster==4),
+  sum(result19$cluster==4)
+)
+fives <- c(
+  sum(result1$cluster==5),
+  sum(result2$cluster==5),
+  sum(result3$cluster==5),
+  sum(result4$cluster==5),
+  sum(result5$cluster==5),
+  sum(result6$cluster==5),
+  sum(result7$cluster==5),
+  sum(result8$cluster==5),
+  sum(result9$cluster==5),
+  sum(result10$cluster==5),
+  sum(result11$cluster==5),
+  sum(result12$cluster==5),
+  sum(result13$cluster==5),
+  sum(result14$cluster==5),
+  sum(result15$cluster==5),
+  sum(result16$cluster==5),
+  sum(result17$cluster==5),
+  sum(result18$cluster==5),
+  sum(result19$cluster==5)
+)
+clusters <- c(
+  length(unique(result1$cluster)),
+  length(unique(result2$cluster)),
+  length(unique(result3$cluster)),
+  length(unique(result4$cluster)),
+  length(unique(result5$cluster)),
+  length(unique(result6$cluster)),
+  length(unique(result7$cluster)),
+  length(unique(result8$cluster)),
+  length(unique(result9$cluster)),
+  length(unique(result10$cluster)),
+  length(unique(result11$cluster)),
+  length(unique(result12$cluster)),
+  length(unique(result13$cluster)),
+  length(unique(result14$cluster)),
+  length(unique(result15$cluster)),
+  length(unique(result16$cluster)),
+  length(unique(result17$cluster)),
+  length(unique(result18$cluster)),
+  length(unique(result19$cluster))+1  # There is no 0
+)
+total_muns <- length(munic$MUNICIPIO)
+spatial_tuning <- data.frame(
+  "Perc. 0s" = round(zeros/total_muns*100,2),
+  "Perc. 1s" = round(ones/total_muns*100,2),
+  "Perc. 2s" = round(twos/total_muns*100,2),
+  "Perc. 3s" = round(threes/total_muns*100,2),
+  "Perc. 4s" = round(fours/total_muns*100,2),
+  "Perc. 5s" = round(fives/total_muns*100,2),
+  N.clusters = clusters-1
+)
+# Create a new column in my_dataframe containing the parameter vectors
+spatial_tuning$Parameters <- apply(parameters, 1, function(x) list(as.numeric(x)))
+
+# Convert the column into a list of vectors
+spatial_tuning$Parameters <- do.call(rbind, spatial_tuning$Parameters)
+
+# Sort the dataframe by the first component of the 'Parameters' column
+spatial_tuning <- spatial_tuning[order(sapply(spatial_tuning$Parameters, function(x) x[1])), ]
+print(spatial_tuning)
+
+# Spatial coordinates visualization
+plot(x,y, asp = 1, xlim=c(-20,6))
+axis(1, at = seq(-20, 6, by = 2))
+axis(2, at = seq(26, 44, by = 2))
+vertical_lines <- seq(-18, 4, by = 2)
+for (v in vertical_lines) {
+  abline(v = v, col = "grey", lty = 2)
+}
+horizontal_lines <- seq(28, 42, by = 2)
+for (h in horizontal_lines) {
+  abline(h = h, col = "grey", lty = 2)
+}
+# Draw circles with specified radii (ratios)
+origin <- c(-4, 40)
+radii <- c(2, 3.5, 4, 5)
+colors <- c("red", "purple", "green", "blue")
+line_width <- 2
+
+for (i in 1:length(radii)) {
+  symbols(origin[1], origin[2], circles = radii[i], add = TRUE, inches = FALSE, bg = NA, fg = colors[i], lwd = line_width)
+}
+
+# Add cross at the origin
+cross_length <- 0.5  # Length of the cross arms
+segments(x0 = origin[1] - cross_length, y0 = origin[2], 
+         x1 = origin[1] + cross_length, y1 = origin[2], col = "red", lwd = 2)
+segments(x0 = origin[1], y0 = origin[2] - cross_length, 
+         x1 = origin[1], y1 = origin[2] + cross_length, col = "red", lwd = 2)
+
+# Add legend
+legend("topleft", legend = c(expression(epsilon == 2), expression(epsilon == 3.5), expression(epsilon == 4), expression(epsilon == 5)), 
+       col = colors, lty = 1, bty = "n")
+
+
+
+### Temporal tuning
+```{r}
+eps <- 3.5  # spatial
+eps2 <- 0  # temporal
+eps3 <- 10 # longevity
+minpts <- 100 # Minimum number of points
+
+result20 <- stdbscan(x,y,time,eps,eps2,eps3,minpts,IL,IL2,IL3,SR_65,SR_85,SR_100)
+unique(result20$cluster)
+
+eps2 <- 4  # temporal
+
+result21 <- stdbscan(x,y,time,eps,eps2,eps3,minpts,IL,IL2,IL3,SR_65,SR_85,SR_100)
+unique(result21$cluster)
+
+eps2 <- 6  # temporal
+
+result22 <- stdbscan(x,y,time,eps,eps2,eps3,minpts,IL,IL2,IL3,SR_65,SR_85,SR_100)
+unique(result22$cluster)
+
+eps2 <- 8  # temporal
+
+result23 <- stdbscan(x,y,time,eps,eps2,eps3,minpts,IL,IL2,IL3,SR_65,SR_85,SR_100)
+unique(result23$cluster)
+
+eps2 <- 1e2  # temporal
+
+result24 <- stdbscan(x,y,time,eps,eps2,eps3,minpts,IL,IL2,IL3,SR_65,SR_85,SR_100)
+unique(result24$cluster)
+
+parameters <- data.frame(
+  Eps = c(rep(3.5,6)),
+  Eps2 = c(2,0,4,6,8,1e2),
+  Eps3 = c(rep(10,6)),
+  Minpts = c(rep(100,6))
+)
+zeros <- c(
+  sum(result10$cluster==0),
+  sum(result20$cluster==0),
+  sum(result21$cluster==0),
+  sum(result22$cluster==0),
+  sum(result23$cluster==0),
+  sum(result24$cluster==0)
+)
+ones <- c(
+  sum(result10$cluster==1),
+  sum(result20$cluster==1),
+  sum(result21$cluster==1),
+  sum(result22$cluster==1),
+  sum(result23$cluster==1),
+  sum(result24$cluster==1)
+)
+twos <- c(
+  sum(result10$cluster==2),
+  sum(result20$cluster==2),
+  sum(result21$cluster==2),
+  sum(result22$cluster==2),
+  sum(result23$cluster==2),
+  sum(result24$cluster==2)
+)
+threes <- c(
+  sum(result10$cluster==3),
+  sum(result20$cluster==3),
+  sum(result21$cluster==3),
+  sum(result22$cluster==3),
+  sum(result23$cluster==3),
+  sum(result24$cluster==3)
+)
+fours <- c(
+  sum(result10$cluster==4),
+  sum(result20$cluster==4),
+  sum(result21$cluster==4),
+  sum(result22$cluster==4),
+  sum(result23$cluster==4),
+  sum(result24$cluster==4)
+)
+fives <- c(
+  sum(result10$cluster==5),
+  sum(result20$cluster==5),
+  sum(result21$cluster==5),
+  sum(result22$cluster==5),
+  sum(result23$cluster==5),
+  sum(result24$cluster==5)
+)
+clusters <- c(
+  length(unique(result10$cluster)),
+  length(unique(result20$cluster)),
+  length(unique(result21$cluster)),
+  length(unique(result22$cluster)),
+  length(unique(result23$cluster)),
+  length(unique(result24$cluster))
+)
+total_muns <- length(munic$MUNICIPIO)
+temporal_tuning <- data.frame(
+  "% 0s" = round(zeros/total_muns*100,2),
+  "% 1s" = round(ones/total_muns*100,2),
+  "% 2s" = round(twos/total_muns*100,2),
+  "% 3s" = round(threes/total_muns*100,2),
+  "% 4s" = round(fours/total_muns*100,2),
+  "% 5s" = round(fives/total_muns*100,2),
+  N.clusters = clusters-1
+)
+# Create a new column in my_dataframe containing the parameter vectors
+temporal_tuning$Parameters <- apply(parameters, 1, function(x) list(as.numeric(x)))
+
+# Convert the column into a list of vectors
+temporal_tuning$Parameters <- do.call(rbind, temporal_tuning$Parameters)
+
+# Sort the dataframe by the second components of the 'Parameters' column
+temporal_tuning <- temporal_tuning[order(sapply(temporal_tuning$Parameters, function(x) x[2])), ]
+print(temporal_tuning)
+
+### Longevity tuning
+
+eps <- 3.5  # spatial
+eps2 <- 2  # temporal
+eps3 <- 0.5 # longevity
+minpts <- 100 # Minimum number of points
+
+result25 <- stdbscan(x,y,time,eps,eps2,eps3,minpts,IL,IL2,IL3,SR_65,SR_85,SR_100)
+unique(result25$cluster)
+
+eps3 <- 1 # longevity
+
+result26 <- stdbscan(x,y,time,eps,eps2,eps3,minpts,IL,IL2,IL3,SR_65,SR_85,SR_100)
+unique(result26$cluster)
+
+eps3 <- 2 # longevity
+
+result27 <- stdbscan(x,y,time,eps,eps2,eps3,minpts,IL,IL2,IL3,SR_65,SR_85,SR_100)
+unique(result27$cluster)
+
+eps3 <- 3 # longevity
+
+result28 <- stdbscan(x,y,time,eps,eps2,eps3,minpts,IL,IL2,IL3,SR_65,SR_85,SR_100)
+unique(result28$cluster)
+
+eps3 <- 4 # longevity
+
+result29 <- stdbscan(x,y,time,eps,eps2,eps3,minpts,IL,IL2,IL3,SR_65,SR_85,SR_100)
+unique(result29$cluster)
+
+eps3 <- 5 # longevity
+
+result30 <- stdbscan(x,y,time,eps,eps2,eps3,minpts,IL,IL2,IL3,SR_65,SR_85,SR_100)
+unique(result30$cluster)
+
+eps3 <- 6 # longevity
+
+result31 <- stdbscan(x,y,time,eps,eps2,eps3,minpts,IL,IL2,IL3,SR_65,SR_85,SR_100)
+unique(result31$cluster)
+
+eps3 <- 7 # longevity
+
+result32 <- stdbscan(x,y,time,eps,eps2,eps3,minpts,IL,IL2,IL3,SR_65,SR_85,SR_100)
+unique(result32$cluster)
+
+eps3 <- 8 # longevity
+
+result33 <- stdbscan(x,y,time,eps,eps2,eps3,minpts,IL,IL2,IL3,SR_65,SR_85,SR_100)
+unique(result33$cluster)
+
+eps3 <- 9 # longevity
+
+result34 <- stdbscan(x,y,time,eps,eps2,eps3,minpts,IL,IL2,IL3,SR_65,SR_85,SR_100)
+unique(result34$cluster)
+
+eps3 <- 11 # longevity
+
+result35 <- stdbscan(x,y,time,eps,eps2,eps3,minpts,IL,IL2,IL3,SR_65,SR_85,SR_100)
+unique(result35$cluster)
+
+eps3 <- 12 # longevity
+
+result36 <- stdbscan(x,y,time,eps,eps2,eps3,minpts,IL,IL2,IL3,SR_65,SR_85,SR_100)
+unique(result36$cluster)
+
+eps3 <- 13 # longevity
+
+result37 <- stdbscan(x,y,time,eps,eps2,eps3,minpts,IL,IL2,IL3,SR_65,SR_85,SR_100)
+unique(result37$cluster)
+
+eps3 <- 15 # longevity
+
+result38 <- stdbscan(x,y,time,eps,eps2,eps3,minpts,IL,IL2,IL3,SR_65,SR_85,SR_100)
+unique(result38$cluster)
+
+eps3 <- 17 # longevity
+
+result39 <- stdbscan(x,y,time,eps,eps2,eps3,minpts,IL,IL2,IL3,SR_65,SR_85,SR_100)
+unique(result39$cluster)
+
+eps3 <- 19 # longevity
+
+result40 <- stdbscan(x,y,time,eps,eps2,eps3,minpts,IL,IL2,IL3,SR_65,SR_85,SR_100)
+unique(result40$cluster)
+
+eps3 <- 22 # longevity
+
+result41 <- stdbscan(x,y,time,eps,eps2,eps3,minpts,IL,IL2,IL3,SR_65,SR_85,SR_100)
+unique(result41$cluster)
+
+eps3 <- 25 # longevity
+
+result42 <- stdbscan(x,y,time,eps,eps2,eps3,minpts,IL,IL2,IL3,SR_65,SR_85,SR_100)
+unique(result42$cluster)
+
+eps3 <- 30 # longevity
+
+result43 <- stdbscan(x,y,time,eps,eps2,eps3,minpts,IL,IL2,IL3,SR_65,SR_85,SR_100)
+unique(result43$cluster)
+
+eps3 <- 1e5 # longevity
+
+result44 <- stdbscan(x,y,time,eps,eps2,eps3,minpts,IL,IL2,IL3,SR_65,SR_85,SR_100)
+unique(result44$cluster)
+
+parameters <- data.frame(
+  Eps = c(rep(3.5,21)),
+  Eps2 = c(rep(2,21)),
+  Eps3 = c(10,0.5,1,2,3,4,5,6,7,8,9,11,12,13,15,17,19,22,25,30,1e5),
+  Minpts = c(rep(100,21))
+)
+zeros <- c(
+  sum(result10$cluster==0),
+  sum(result25$cluster==0),
+  sum(result26$cluster==0),
+  sum(result27$cluster==0),
+  sum(result28$cluster==0),
+  sum(result29$cluster==0),
+  sum(result30$cluster==0),
+  sum(result31$cluster==0),
+  sum(result32$cluster==0),
+  sum(result33$cluster==0),
+  sum(result34$cluster==0),
+  sum(result35$cluster==0),
+  sum(result36$cluster==0),
+  sum(result37$cluster==0),
+  sum(result38$cluster==0),
+  sum(result39$cluster==0),
+  sum(result40$cluster==0),
+  sum(result41$cluster==0),
+  sum(result42$cluster==0),
+  sum(result43$cluster==0),
+  sum(result44$cluster==0)
+)
+ones <- c(
+  sum(result10$cluster==1),
+  sum(result25$cluster==1),
+  sum(result26$cluster==1),
+  sum(result27$cluster==1),
+  sum(result28$cluster==1),
+  sum(result29$cluster==1),
+  sum(result30$cluster==1),
+  sum(result31$cluster==1),
+  sum(result32$cluster==1),
+  sum(result33$cluster==1),
+  sum(result34$cluster==1),
+  sum(result35$cluster==1),
+  sum(result36$cluster==1),
+  sum(result37$cluster==1),
+  sum(result38$cluster==1),
+  sum(result39$cluster==1),
+  sum(result40$cluster==1),
+  sum(result41$cluster==1),
+  sum(result42$cluster==1),
+  sum(result43$cluster==1),
+  sum(result44$cluster==1)
+)
+twos <- c(
+  sum(result10$cluster==2),
+  sum(result25$cluster==2),
+  sum(result26$cluster==2),
+  sum(result27$cluster==2),
+  sum(result28$cluster==2),
+  sum(result29$cluster==2),
+  sum(result30$cluster==2),
+  sum(result31$cluster==2),
+  sum(result32$cluster==2),
+  sum(result33$cluster==2),
+  sum(result34$cluster==2),
+  sum(result35$cluster==2),
+  sum(result36$cluster==2),
+  sum(result37$cluster==2),
+  sum(result38$cluster==2),
+  sum(result39$cluster==2),
+  sum(result40$cluster==2),
+  sum(result41$cluster==2),
+  sum(result42$cluster==2),
+  sum(result43$cluster==2),
+  sum(result44$cluster==2)
+)
+threes <- c(
+  sum(result10$cluster==3),
+  sum(result25$cluster==3),
+  sum(result26$cluster==3),
+  sum(result27$cluster==3),
+  sum(result28$cluster==3),
+  sum(result29$cluster==3),
+  sum(result30$cluster==3),
+  sum(result31$cluster==3),
+  sum(result32$cluster==3),
+  sum(result33$cluster==3),
+  sum(result34$cluster==3),
+  sum(result35$cluster==3),
+  sum(result36$cluster==3),
+  sum(result37$cluster==3),
+  sum(result38$cluster==3),
+  sum(result39$cluster==3),
+  sum(result40$cluster==3),
+  sum(result41$cluster==3),
+  sum(result42$cluster==3),
+  sum(result43$cluster==3),
+  sum(result44$cluster==3)
+)
+fours <- c(
+  sum(result10$cluster==4),
+  sum(result25$cluster==4),
+  sum(result26$cluster==4),
+  sum(result27$cluster==4),
+  sum(result28$cluster==4),
+  sum(result29$cluster==4),
+  sum(result30$cluster==4),
+  sum(result31$cluster==4),
+  sum(result32$cluster==4),
+  sum(result33$cluster==4),
+  sum(result34$cluster==4),
+  sum(result35$cluster==4),
+  sum(result36$cluster==4),
+  sum(result37$cluster==4),
+  sum(result38$cluster==4),
+  sum(result39$cluster==4),
+  sum(result40$cluster==4),
+  sum(result41$cluster==4),
+  sum(result42$cluster==4),
+  sum(result43$cluster==4),
+  sum(result44$cluster==4)
+)
+fives <- c(
+  sum(result10$cluster==5),
+  sum(result25$cluster==5),
+  sum(result26$cluster==5),
+  sum(result27$cluster==5),
+  sum(result28$cluster==5),
+  sum(result29$cluster==5),
+  sum(result30$cluster==5),
+  sum(result31$cluster==5),
+  sum(result32$cluster==5),
+  sum(result33$cluster==5),
+  sum(result34$cluster==5),
+  sum(result35$cluster==5),
+  sum(result36$cluster==5),
+  sum(result37$cluster==5),
+  sum(result38$cluster==5),
+  sum(result39$cluster==5),
+  sum(result40$cluster==5),
+  sum(result41$cluster==5),
+  sum(result42$cluster==5),
+  sum(result43$cluster==5),
+  sum(result44$cluster==5)
+)
+clusters <- c(
+  length(unique(result10$cluster)),
+  length(unique(result25$cluster)),
+  length(unique(result26$cluster)),
+  length(unique(result27$cluster)),
+  length(unique(result28$cluster)),
+  length(unique(result29$cluster)),
+  length(unique(result30$cluster)),
+  length(unique(result31$cluster)),
+  length(unique(result32$cluster)),
+  length(unique(result33$cluster)),
+  length(unique(result34$cluster)),
+  length(unique(result35$cluster)),
+  length(unique(result36$cluster)),
+  length(unique(result37$cluster)),
+  length(unique(result38$cluster)),
+  length(unique(result39$cluster)),
+  length(unique(result40$cluster)),
+  length(unique(result41$cluster)),
+  length(unique(result42$cluster)),
+  length(unique(result43$cluster)),
+  length(unique(result44$cluster))
+)
+total_muns <- length(munic$MUNICIPIO)
+longevity_tuning <- data.frame(
+  "% 0s" = round(zeros/total_muns*100,2),
+  "% 1s" = round(ones/total_muns*100,2),
+  "% 2s" = round(twos/total_muns*100,2),
+  "% 3s" = round(threes/total_muns*100,2),
+  "% 4s" = round(fours/total_muns*100,2),
+  "% 5s" = round(fives/total_muns*100,2),
+  N.clusters = clusters-1
+)
+# Create a new column in my_dataframe containing the parameter vectors
+longevity_tuning$Parameters <- apply(parameters, 1, function(x) list(as.numeric(x)))
+
+# Convert the column into a list of vectors
+longevity_tuning$Parameters <- do.call(rbind, longevity_tuning$Parameters)
+
+# Sort the dataframe by the third component of the 'Parameters' column
+longevity_tuning <- longevity_tuning[order(sapply(longevity_tuning$Parameters, function(x) x[3])), ]
+print(longevity_tuning)
+
+### Minpts parameter tuning
+eps <- 3.5  # spatial
+eps2 <- 2  # temporal
+eps3 <- 12 # longevity
+minpts <- 15 # Minimum number of points
+
+result45 <- stdbscan(x,y,time,eps,eps2,eps3,minpts,IL,IL2,IL3,SR_65,SR_85,SR_100)
+unique(result45$cluster)
+
+minpts <- 25 # Minimum number of points
+
+result46 <- stdbscan(x,y,time,eps,eps2,eps3,minpts,IL,IL2,IL3,SR_65,SR_85,SR_100)
+unique(result46$cluster)
+
+minpts <- 50 # Minimum number of points
+
+result47 <- stdbscan(x,y,time,eps,eps2,eps3,minpts,IL,IL2,IL3,SR_65,SR_85,SR_100)
+unique(result47$cluster)
+
+minpts <- 75 # Minimum number of points
+
+result48 <- stdbscan(x,y,time,eps,eps2,eps3,minpts,IL,IL2,IL3,SR_65,SR_85,SR_100)
+unique(result48$cluster)
+
+minpts <- 150 # Minimum number of points
+
+result49 <- stdbscan(x,y,time,eps,eps2,eps3,minpts,IL,IL2,IL3,SR_65,SR_85,SR_100)
+unique(result49$cluster)
+
+minpts <- 200 # Minimum number of points
+
+result50 <- stdbscan(x,y,time,eps,eps2,eps3,minpts,IL,IL2,IL3,SR_65,SR_85,SR_100)
+unique(result50$cluster)
+
+minpts <- 300 # Minimum number of points
+
+result51 <- stdbscan(x,y,time,eps,eps2,eps3,minpts,IL,IL2,IL3,SR_65,SR_85,SR_100)
+unique(result51$cluster)
+
+minpts <- 400 # Minimum number of points
+
+result52 <- stdbscan(x,y,time,eps,eps2,eps3,minpts,IL,IL2,IL3,SR_65,SR_85,SR_100)
+unique(result52$cluster)
+
+parameters <- data.frame(
+  Eps = c(rep(3.5,9)),
+  Eps2 = c(rep(2,9)),
+  Eps3 = c(rep(12,9)),
+  Minpts = c(100,15,25,50,75,150,200,300,400)
+)
+zeros <- c(
+  sum(result36$cluster==0),
+  sum(result45$cluster==0),
+  sum(result46$cluster==0),
+  sum(result47$cluster==0),
+  sum(result48$cluster==0),
+  sum(result49$cluster==0),
+  sum(result50$cluster==0),
+  sum(result51$cluster==0),
+  sum(result52$cluster==0)
+)
+ones <- c(
+  sum(result36$cluster==1),
+  sum(result45$cluster==1),
+  sum(result46$cluster==1),
+  sum(result47$cluster==1),
+  sum(result48$cluster==1),
+  sum(result49$cluster==1),
+  sum(result50$cluster==1),
+  sum(result51$cluster==1),
+  sum(result52$cluster==1)
+)
+twos <- c(
+  sum(result36$cluster==2),
+  sum(result45$cluster==2),
+  sum(result46$cluster==2),
+  sum(result47$cluster==2),
+  sum(result48$cluster==2),
+  sum(result49$cluster==2),
+  sum(result50$cluster==2),
+  sum(result51$cluster==2),
+  sum(result52$cluster==2)
+)
+threes <- c(
+  sum(result36$cluster==3),
+  sum(result45$cluster==3),
+  sum(result46$cluster==3),
+  sum(result47$cluster==3),
+  sum(result48$cluster==3),
+  sum(result49$cluster==3),
+  sum(result50$cluster==3),
+  sum(result51$cluster==3),
+  sum(result52$cluster==3)
+)
+fours <- c(
+  sum(result36$cluster==4),
+  sum(result45$cluster==4),
+  sum(result46$cluster==4),
+  sum(result47$cluster==4),
+  sum(result48$cluster==4),
+  sum(result49$cluster==4),
+  sum(result50$cluster==4),
+  sum(result51$cluster==4),
+  sum(result52$cluster==4)
+)
+fives <- c(
+  sum(result36$cluster==5),
+  sum(result45$cluster==5),
+  sum(result46$cluster==5),
+  sum(result47$cluster==5),
+  sum(result48$cluster==5),
+  sum(result49$cluster==5),
+  sum(result50$cluster==5),
+  sum(result51$cluster==5),
+  sum(result52$cluster==5)
+)
+clusters <- c(
+  length(unique(result36$cluster)),
+  length(unique(result45$cluster)),
+  length(unique(result46$cluster)),
+  length(unique(result47$cluster)),
+  length(unique(result48$cluster)),
+  length(unique(result49$cluster)),
+  length(unique(result50$cluster)),
+  length(unique(result51$cluster)),
+  length(unique(result52$cluster))
+)
+total_muns <- length(munic$MUNICIPIO)
+minpts_tuning <- data.frame(
+  "% 0s" = round(zeros/total_muns*100,2),
+  "% 1s" = round(ones/total_muns*100,2),
+  "% 2s" = round(twos/total_muns*100,2),
+  "% 3s" = round(threes/total_muns*100,2),
+  "% 4s" = round(fours/total_muns*100,2),
+  "% 5s" = round(fives/total_muns*100,2),
+  N.clusters = clusters-1
+)
+# Create a new column in my_dataframe containing the parameter vectors
+minpts_tuning$Parameters <- apply(parameters, 1, function(x) list(as.numeric(x)))
+
+# Convert the column into a list of vectors
+minpts_tuning$Parameters <- do.call(rbind, minpts_tuning$Parameters)
+
+# Sort the dataframe by the fourth component of the 'Parameters' column
+minpts_tuning <- minpts_tuning[order(sapply(minpts_tuning$Parameters, function(x) x[4])), ]
+print(minpts_tuning)
+
+#### Visualization
+
+munic$cluster <- result47$cluster
+cluster_12 <- munic[munic$year==2012,]
+cluster_14 <- munic[munic$year==2014,]
+cluster_16 <- munic[munic$year==2016,]
+cluster_18 <- munic[munic$year==2018,]
+cluster_20 <- munic[munic$year==2020,]
+cluster_22 <- munic[munic$year==2022,]
+
+
+cluster_12$MUNICIPIO <- as.character(cluster_12$MUNICIPIO)
+cluster_12$PROV <- as.character(cluster_12$PROV)
+
+munics_12$cluster <- NULL
+munics_12 <- munics_12 %>%
+  left_join(cluster_12[,c("PROV","MUNICIPIO","cluster")], by = c("ine.prov.name"="PROV", "name"="MUNICIPIO"))
+plot_12_47<-ggplot(munics_12) +
+  geom_sf(aes(fill = factor(cluster)), alpha = 0.9, color = NA) +
+  scale_fill_manual(values = c("0" = "#1f78b4",  # Blue
+                               "1" = "#33a02c",  # Green
+                               "2" = "#e31a1c",  # Red
+                               "3" = "#ff7f00",  # Orange
+                               "4" = "#6a3d9a",  # Purple
+                               "5" = "#b15928")) +  # Brown
+  labs(
+    fill = "cluster",
+    title = "2012"
+  ) +
+  theme_void() +
+  theme(
+    plot.background = element_rect(fill = "grey80"),
+    text = element_text(face = "bold"),
+    plot.title = element_text(hjust = 0.5),
+    plot.subtitle = element_text(hjust = 0.5)
+  )
+
+cluster_14$MUNICIPIO <- as.character(cluster_14$MUNICIPIO)
+cluster_14$PROV <- as.character(cluster_14$PROV)
+
+munics_14$cluster <- NULL
+munics_14 <- munics_14 %>%
+  left_join(cluster_14[,c("PROV","MUNICIPIO","cluster")], by = c("ine.prov.name"="PROV", "name"="MUNICIPIO"))
+
+
+plot_14_47<-ggplot(munics_14) +
+  geom_sf(aes(fill = factor(cluster)), alpha = 0.9, color = NA) +
+  scale_fill_manual(values = c("0" = "#1f78b4",  # Blue
+                               "1" = "#33a02c",  # Green
+                               "2" = "#e31a1c",  # Red
+                               "3" = "#ff7f00",  # Orange
+                               "4" = "#6a3d9a",  # Purple
+                               "5" = "#b15928")) +  # Brown
+  labs(
+    fill = "cluster",
+    title = "2014"
+  ) +
+  theme_void() +
+  theme(
+    plot.background = element_rect(fill = "grey80"),
+    text = element_text(face = "bold"),
+    plot.title = element_text(hjust = 0.5),
+    plot.subtitle = element_text(hjust = 0.5)
+  )
+
+cluster_16$MUNICIPIO <- as.character(cluster_16$MUNICIPIO)
+cluster_16$PROV <- as.character(cluster_16$PROV)
+
+munics_16$cluster <- NULL
+munics_16 <- munics_16 %>%
+  left_join(cluster_16[,c("PROV","MUNICIPIO","cluster")], by = c("ine.prov.name"="PROV", "name"="MUNICIPIO"))
+
+
+plot_16_47<-ggplot(munics_16) +
+  geom_sf(aes(fill = factor(cluster)), alpha = 0.9, color = NA) +
+  scale_fill_manual(values = c("0" = "#1f78b4",  # Blue
+                               "1" = "#33a02c",  # Green
+                               "2" = "#e31a1c",  # Red
+                               "3" = "#ff7f00",  # Orange
+                               "4" = "#6a3d9a",  # Purple
+                               "5" = "#b15928")) +  # Brown
+  labs(
+    fill = "cluster",
+    title = "2016"
+  ) +
+  theme_void() +
+  theme(
+    plot.background = element_rect(fill = "grey80"),
+    text = element_text(face = "bold"),
+    plot.title = element_text(hjust = 0.5),
+    plot.subtitle = element_text(hjust = 0.5)
+  )
+
+cluster_18$MUNICIPIO <- as.character(cluster_18$MUNICIPIO)
+cluster_18$PROV <- as.character(cluster_18$PROV)
+
+munics_18$cluster <- NULL
+munics_18 <- munics_18 %>%
+  left_join(cluster_18[,c("PROV","MUNICIPIO","cluster")], by = c("ine.prov.name"="PROV", "name"="MUNICIPIO"))
+
+
+plot_18_47<-ggplot(munics_18) +
+  geom_sf(aes(fill = factor(cluster)), alpha = 0.9, color = NA) +
+  scale_fill_manual(values = c("0" = "#1f78b4",  # Blue
+                               "1" = "#33a02c",  # Green
+                               "2" = "#e31a1c",  # Red
+                               "3" = "#ff7f00",  # Orange
+                               "4" = "#6a3d9a",  # Purple
+                               "5" = "#b15928")) +  # Brown
+  labs(
+    fill = "cluster",
+    title = "2018"
+  ) +
+  theme_void() +
+  theme(
+    plot.background = element_rect(fill = "grey80"),
+    text = element_text(face = "bold"),
+    plot.title = element_text(hjust = 0.5),
+    plot.subtitle = element_text(hjust = 0.5)
+  )
+
+cluster_20$MUNICIPIO <- as.character(cluster_20$MUNICIPIO)
+cluster_20$PROV <- as.character(cluster_20$PROV)
+
+munics_20$cluster <- NULL
+munics_20 <- munics_20 %>%
+  left_join(cluster_20["PROV","MUNICIPIO","cluster"], by = c("ine.prov.name"="PROV", "name"="MUNICIPIO"))
+
+
+plot_20_47<-ggplot(munics_20) +
+  geom_sf(aes(fill = factor(cluster)), alpha = 0.9, color = NA) +
+  scale_fill_manual(values = c("0" = "#1f78b4",  # Blue
+                               "1" = "#33a02c",  # Green
+                               "2" = "#e31a1c",  # Red
+                               "3" = "#ff7f00",  # Orange
+                               "4" = "#6a3d9a",  # Purple
+                               "5" = "#b15928")) +  # Brown
+  labs(
+    fill = "cluster",
+    title = "2020"
+  ) +
+  theme_void() +
+  theme(
+    plot.background = element_rect(fill = "grey80"),
+    text = element_text(face = "bold"),
+    plot.title = element_text(hjust = 0.5),
+    plot.subtitle = element_text(hjust = 0.5)
+  )
+
+cluster_22$MUNICIPIO <- as.character(cluster_22$MUNICIPIO)
+cluster_22$PROV <- as.character(cluster_22$PROV)
+
+munics_22$cluster <- NULL
+munics_22 <- munics_22 %>%
+  left_join(cluster_22["PROV","MUNICIPIO","cluster"], by = c("ine.prov.name"="PROV", "name"="MUNICIPIO"))
+
+
+plot_22_47<-ggplot(munics_22) +
+  geom_sf(aes(fill = factor(cluster)), alpha = 0.9, color = NA) +
+  scale_fill_manual(values = c("0" = "#1f78b4",  # Blue
+                               "1" = "#33a02c",  # Green
+                               "2" = "#e31a1c",  # Red
+                               "3" = "#ff7f00",  # Orange
+                               "4" = "#6a3d9a",  # Purple
+                               "5" = "#b15928")) +  # Brown
+  labs(
+    fill = "cluster",
+    title = "2022"
+  ) +
+  theme_void() +
+  theme(
+    plot.background = element_rect(fill = "grey80"),
+    text = element_text(face = "bold"),
+    plot.title = element_text(hjust = 0.5),
+    plot.subtitle = element_text(hjust = 0.5)
+  )
+
+# Combine all plots
+grid.arrange(plot_12_47, plot_14_47, plot_16_47, plot_18_47, plot_20_47, plot_22_47, nrow = 3, ncol = 2, 
+             widths = unit(c(8,8), "cm"),
+             heights = unit(c(5, 5, 5), "cm"))
+
