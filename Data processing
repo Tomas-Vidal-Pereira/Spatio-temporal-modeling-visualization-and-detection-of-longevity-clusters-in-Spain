@@ -1556,5 +1556,256 @@ total_C22 <- sum(munic_22$older_100)
 total22 <- sum(munic_22$total)
 munic_22$IL <- (munic_22$older_100/total_C22)/(munic_22$total/total22)
 
+munic_12$MUNICIPIO <- as.character(munic_12$MUNICIPIO)
+munic_12$PROV <- as.character(munic_12$PROV)
+  # Left-join
+munics_12 <- munics_12 %>%
+  left_join(munic_12, by = c("ine.prov.name"="PROV", "name"="MUNICIPIO"))
 
+custom_colors <- c("white", "wheat3","orange", "darkgreen")
+breaks <- c(-0.00001,0.00001, 2, 4, Inf)
+labels <- c("0", "0 - 2", "2 - 4", "> 4")
 
+plot_IL_12 <- ggplot(munics_12) +
+  geom_sf(aes(fill = cut(IL, breaks = breaks, labels = labels)), alpha = 0.9, color = NA) +
+  scale_fill_manual(
+    values = custom_colors,
+    labels = labels,
+    drop = FALSE
+  ) +
+  labs(
+    fill = "IL",
+    title = "2012"
+  ) +
+  theme_void() +
+  theme(
+    plot.background = element_rect(fill = "grey80"),
+    text = element_text(face = "bold"),
+    plot.title = element_text(hjust = .5),
+    plot.subtitle = element_text(hjust = .5)
+  )
+
+munic_14$MUNICIPIO <- as.character(munic_14$MUNICIPIO)
+munic_14$PROV <- as.character(munic_14$PROV)
+munics_14 <- munics_14 %>%
+  left_join(munic_14, by = c("ine.prov.name"="PROV", "name"="MUNICIPIO"))
+
+plot_IL_14 <- ggplot(munics_14) +
+  geom_sf(aes(fill = cut(IL, breaks = breaks, labels = labels)), alpha = 0.9, color = NA) +
+  scale_fill_manual(
+    values = custom_colors,
+    labels = labels,
+    drop = FALSE
+  ) +
+  labs(
+    fill = "IL",
+    title = "2014"
+  ) +
+  theme_void() +
+  theme(
+    plot.background = element_rect(fill = "grey80"),
+    text = element_text(face = "bold"),
+    plot.title = element_text(hjust = .5),
+    plot.subtitle = element_text(hjust = .5)
+  )
+
+munic_16$MUNICIPIO <- as.character(munic_16$MUNICIPIO)
+munic_16$PROV <- as.character(munic_16$PROV)
+munics_16 <- munics_16 %>%
+  left_join(munic_16, by = c("ine.prov.name"="PROV", "name"="MUNICIPIO"))
+
+plot_IL_16 <- ggplot(munics_16) +
+  geom_sf(aes(fill = cut(IL, breaks = breaks, labels = labels)), alpha = 0.9, color = NA) +
+  scale_fill_manual(
+    values = custom_colors,
+    labels = labels,
+    drop = FALSE
+  ) +
+  labs(
+    fill = "IL",
+    title = "2016"
+  ) +
+  theme_void() +
+  theme(
+    plot.background = element_rect(fill = "grey80"),
+    text = element_text(face = "bold"),
+    plot.title = element_text(hjust = .5),
+    plot.subtitle = element_text(hjust = .5)
+  )
+
+munic_18$MUNICIPIO <- as.character(munic_18$MUNICIPIO)
+munic_18$PROV <- as.character(munic_18$PROV)
+munics_18 <- munics_18 %>%
+  left_join(munic_18, by = c("ine.prov.name"="PROV", "name"="MUNICIPIO"))
+
+plot_IL_18 <- ggplot(munics_18) +
+  geom_sf(aes(fill = cut(IL, breaks = breaks, labels = labels)), alpha = 0.9, color = NA) +
+  scale_fill_manual(
+    values = custom_colors,
+    labels = labels,
+    drop = FALSE
+  ) +
+  labs(
+    fill = "IL",
+    title = "2018"
+  ) +
+  theme_void() +
+  theme(
+    plot.background = element_rect(fill = "grey80"),
+    text = element_text(face = "bold"),
+    plot.title = element_text(hjust = .5),
+    plot.subtitle = element_text(hjust = .5)
+  )
+
+munic_20$MUNICIPIO <- as.character(munic_20$MUNICIPIO)
+munic_20$PROV <- as.character(munic_20$PROV)
+munics_20 <- munics_20 %>%
+  left_join(munic_20, by = c("ine.prov.name"="PROV", "name"="MUNICIPIO"))
+
+plot_IL_20 <- ggplot(munics_20) +
+  geom_sf(aes(fill = cut(IL, breaks = breaks, labels = labels)), alpha = 0.9, color = NA) +
+  scale_fill_manual(
+    values = custom_colors,
+    labels = labels,
+    drop = FALSE
+  ) +
+  labs(
+    fill = "IL",
+    title = "2020"
+  ) +
+  theme_void() +
+  theme(
+    plot.background = element_rect(fill = "grey80"),
+    text = element_text(face = "bold"),
+    plot.title = element_text(hjust = .5),
+    plot.subtitle = element_text(hjust = .5)
+  )
+
+munic_22$MUNICIPIO <- as.character(munic_22$MUNICIPIO)
+munic_22$PROV <- as.character(munic_22$PROV)
+munics_22 <- munics_22 %>%
+  left_join(munic_22, by = c("ine.prov.name"="PROV", "name"="MUNICIPIO"))
+
+plot_IL_22 <- ggplot(munics_22) +
+  geom_sf(aes(fill = cut(IL, breaks = breaks, labels = labels)), alpha = 0.9, color = NA) +
+  scale_fill_manual(
+    values = custom_colors,
+    labels = labels,
+    drop = FALSE
+  ) +
+  labs(
+    fill = "IL",
+    title = "2022"
+  ) +
+  theme_void() +
+  theme(
+    plot.background = element_rect(fill = "grey80"),
+    text = element_text(face = "bold"),
+    plot.title = element_text(hjust = .5),
+    plot.subtitle = element_text(hjust = .5)
+  )
+# Combine all the plots
+grid.arrange( plot_IL_12, plot_IL_14, plot_IL_16, plot_IL_18, plot_IL_20, plot_IL_22, nrow = 3, ncol = 2, 
+             widths = unit(c(8,8), "cm"),
+             heights = unit(c(5, 5, 5), "cm"))
+wanted_cols <- c("year","MUNICIPIO", "PROV", "IL")
+# 2012
+# Order by IL to get the largest values
+munic_12_sorted_desc <- munic_12[order(munic_12$IL, decreasing = TRUE), ]
+# Extract the 6 largest values
+largest_12 <- head(munic_12_sorted_desc[,wanted_cols], 6)
+second_largest_12 <- munic_12_sorted_desc[,wanted_cols][7:12,]
+# Repeat the same for the remaining years and combine the dataframes conveniently
+# 2014
+munic_14_sorted_desc <- munic_14[order(munic_14$IL, decreasing = TRUE), ]
+largest_14 <- head(munic_14_sorted_desc[,wanted_cols], 6)
+second_largest_14 <- munic_14_sorted_desc[,wanted_cols][7:12,]
+# 2016
+munic_16_sorted_desc <- munic_16[order(munic_16$IL, decreasing = TRUE), ]
+largest_16 <- head(munic_16_sorted_desc[,wanted_cols], 6)
+second_largest_16 <- munic_16_sorted_desc[,wanted_cols][7:12,]
+# 2018
+munic_18_sorted_desc <- munic_18[order(munic_18$IL, decreasing = TRUE), ]
+largest_18 <- head(munic_18_sorted_desc[,wanted_cols], 6)
+second_largest_18 <- munic_18_sorted_desc[,wanted_cols][7:12,]
+# 2020
+munic_20_sorted_desc <- munic_20[order(munic_20$IL, decreasing = TRUE), ]
+largest_20 <- head(munic_20_sorted_desc[,wanted_cols], 6)
+second_largest_20 <- munic_20_sorted_desc[,wanted_cols][7:12,]
+# 2022
+munic_22_sorted_desc <- munic_22[order(munic_22$IL, decreasing = TRUE), ]
+largest_22 <- head(munic_22_sorted_desc[,wanted_cols], 6)
+second_largest_22 <- munic_22_sorted_desc[,wanted_cols][7:12,]
+# Combination
+largest_IL <- rbind(largest_12,largest_14,largest_16,largest_18,
+                     largest_20,largest_22)
+second_largest_IL <- rbind(second_largest_12,second_largest_14,second_largest_16,second_largest_18,
+                     second_largest_20,second_largest_22)
+combination_IL <- cbind(largest_IL,
+                        second_largest_IL[,c("MUNICIPIO","PROV","IL")])
+rello <- c(
+  munic_12[munic_12$MUNICIPIO == "Rello", "IL"][[1]],
+  munic_14[munic_14$MUNICIPIO == "Rello", "IL"][[1]],
+  munic_16[munic_16$MUNICIPIO == "Rello", "IL"][[1]],
+  munic_18[munic_18$MUNICIPIO == "Rello", "IL"][[1]],
+  munic_20[munic_20$MUNICIPIO == "Rello", "IL"][[1]],
+  munic_22[munic_22$MUNICIPIO == "Rello", "IL"][[1]]
+)
+requena_de_campos <- c(
+  munic_12[munic_12$MUNICIPIO == "Requena de Campos", "IL"][[1]],
+  munic_14[munic_14$MUNICIPIO == "Requena de Campos", "IL"][[1]],
+  munic_16[munic_16$MUNICIPIO == "Requena de Campos", "IL"][[1]],
+  munic_18[munic_18$MUNICIPIO == "Requena de Campos", "IL"][[1]],
+  munic_20[munic_20$MUNICIPIO == "Requena de Campos", "IL"][[1]],#NA
+  munic_22[munic_22$MUNICIPIO == "Requena de Campos", "IL"][[1]]#NA
+)
+requena_de_campos <- c(requena_de_campos, rep(NA,2))
+valle_de_bardaji <- c(
+  munic_12[munic_12$MUNICIPIO == "Valle de Bardají", "IL"][[1]],
+  munic_14[munic_14$MUNICIPIO == "Valle de Bardají", "IL"][[1]],
+  munic_16[munic_16$MUNICIPIO == "Valle de Bardají", "IL"][[1]],
+  munic_18[munic_18$MUNICIPIO == "Valle de Bardají", "IL"][[1]],
+  munic_20[munic_20$MUNICIPIO == "Valle de Bardají", "IL"][[1]],
+  munic_22[munic_22$MUNICIPIO == "Valle de Bardají", "IL"][[1]]
+)
+crivillen <- c(
+  munic_12[munic_12$MUNICIPIO=="Crivillén","IL"][[1]], 
+            munic_14[munic_14$MUNICIPIO=="Crivillén","IL"][[1]], 
+            munic_16[munic_16$MUNICIPIO=="Crivillén","IL"][[1]], 
+            munic_18[munic_18$MUNICIPIO=="Crivillén","IL"][[1]], 
+            munic_20[munic_20$MUNICIPIO=="Crivillén","IL"][[1]], 
+            munic_22[munic_22$MUNICIPIO=="Crivillén","IL"][[1]]
+  )
+estriegana <- c(
+  munic_12[munic_12$MUNICIPIO=="Estriégana","IL"][[1]], 
+            munic_14[munic_14$MUNICIPIO=="Estriégana","IL"][[1]], 
+            munic_16[munic_16$MUNICIPIO=="Estriégana","IL"][[1]], 
+            munic_18[munic_18$MUNICIPIO=="Estriégana","IL"][[1]], 
+            munic_20[munic_20$MUNICIPIO=="Estriégana","IL"][[1]], 
+            munic_22[munic_22$MUNICIPIO=="Estriégana","IL"][[1]]
+  )
+data_short <- data.frame(
+  Year = c(2012, 2014, 2016, 2018, 2020, 2022),
+  Rello = rello,
+  Requena_de_Campos = requena_de_campos,
+  Valle_de_Bardají = valle_de_bardaji,
+  Crivillén = crivillen,
+  Estriégana = estriegana
+)
+# TIME SERIES
+data_long <- gather(data_short, key = "Municipality", value = "LocationIndex", -Year)
+ggplot(data_long, aes(x = Year, y = LocationIndex, color = Municipality, group = Municipality)) +
+  geom_line(linewidth = 1) +
+  geom_point(linewidth = 2) +
+  scale_x_continuous(
+    breaks = c(2012, 2014, 2016, 2018, 2020, 2022)
+  ) +
+  labs(title = NULL,
+       x = "Year",
+       y = "IL",
+       color = "Municipality") +
+  theme_minimal()+
+  theme(
+    legend.text = element_text(size = 18),  
+    legend.title = element_text(size = 18)    
+  )
