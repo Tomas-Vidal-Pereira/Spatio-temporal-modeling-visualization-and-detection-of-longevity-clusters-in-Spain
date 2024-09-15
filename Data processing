@@ -1809,3 +1809,1365 @@ ggplot(data_long, aes(x = Year, y = LocationIndex, color = Municipality, group =
     legend.text = element_text(size = 18),  
     legend.title = element_text(size = 18)    
   )
+#################################################################################
+# LOCATION INDEX OF THE CENTENARIAN POPULATION AGES 65 AND ABOVE (MUNICIPALITIES)
+#################################################################################
+# 2012
+total_S12 <- sum(munic_12$older_65)
+munic_12$IL2 <- (munic_12$older_100/total_C12)/(munic_12$older_65/total_S12)
+# Distribution
+hist(munic_12$IL2, 
+     breaks=30,
+     main = "Histogram of IL (>65)",
+     xlab = "IL (>65)",
+     ylab = "Frequency",
+     col = "blue", 
+     border = "black") 
+# 2014
+total_S14 <- sum(munic_14$older_65)
+munic_14$IL2 <- (munic_14$older_100/total_C14)/(munic_14$older_65/total_S14)
+# 2016
+total_S16 <- sum(munic_16$older_65)
+munic_16$IL2 <- (munic_16$older_100/total_C16)/(munic_16$older_65/total_S16)
+# 2018
+total_S18 <- sum(munic_18$older_65)
+munic_18$IL2 <- (munic_18$older_100/total_C18)/(munic_18$older_65/total_S18)
+# 2020
+total_S20 <- sum(munic_20$older_65)
+munic_20$IL2 <- (munic_20$older_100/total_C20)/(munic_20$older_65/total_S20)
+# 2022
+total_S22 <- sum(munic_22$older_65)
+munic_22$IL2 <- (munic_22$older_100/total_C22)/(munic_22$older_65/total_S22)
+
+munics_12 <- munics_12 %>%
+  left_join(munic_12[,c("IL2","PROV", "MUNICIPIO")],
+            by = c("ine.prov.name"="PROV", "name"="MUNICIPIO"))
+
+custom_colors2 <- c("white", "wheat3","orange", "darkgreen")
+breaks2 <- c(-0.00001,0.00001, 1.5, 3.5, Inf)
+labels2 <- c("0", "0 - 1.5", "1.5 - 3.5", "> 3.5")
+
+plot_IL2_12 <- ggplot(munics_12) +
+  geom_sf(aes(fill = cut(IL2, breaks = breaks2, labels = labels2)), alpha = 0.9, color = NA) +
+  scale_fill_manual(
+    values = custom_colors2,
+    labels = labels2,
+    drop = FALSE,
+    na.translate = FALSE
+  ) +
+  labs(
+    fill = "IL (>65)",
+    title = "2012"
+  ) +
+  theme_void() +
+  theme(
+    plot.background = element_rect(fill = "grey80"),
+    text = element_text(face = "bold"),
+    plot.title = element_text(hjust = .5),
+    plot.subtitle = element_text(hjust = .5)
+  )
+munics_14 <- munics_14 %>%
+  left_join(munic_14[,c("IL2","PROV", "MUNICIPIO")],
+            by = c("ine.prov.name"="PROV", "name"="MUNICIPIO"))
+plot_IL2_14 <- ggplot(munics_14) +
+  geom_sf(aes(fill = cut(IL2.x, breaks = breaks2, labels = labels2)), alpha = 0.9, color = NA) +
+  scale_fill_manual(
+    values = custom_colors2,
+    labels = labels2,
+    drop = FALSE,
+    na.translate = FALSE
+  ) +
+  labs(
+    fill = "IL (>65)",
+    title = "2014"
+  ) +
+  theme_void() +
+  theme(
+    plot.background = element_rect(fill = "grey80"),
+    text = element_text(face = "bold"),
+    plot.title = element_text(hjust = .5),
+    plot.subtitle = element_text(hjust = .5)
+  )
+munics_16 <- munics_16 %>%
+  left_join(munic_16[,c("IL2","PROV", "MUNICIPIO")],
+            by = c("ine.prov.name"="PROV", "name"="MUNICIPIO"))
+plot_IL2_16 <- ggplot(munics_16) +
+  geom_sf(aes(fill = cut(IL2, breaks = breaks2, labels = labels2)), alpha = 0.9, color = NA) +
+  scale_fill_manual(
+    values = custom_colors2,
+    labels = labels2,
+    drop = ,
+    na.translate = FALSE
+  ) +
+  labs(
+    fill = "IL (>65)",
+    title = "2016"
+  ) +
+  theme_void() +
+  theme(
+    plot.background = element_rect(fill = "grey80"),
+    text = element_text(face = "bold"),
+    plot.title = element_text(hjust = .5),
+    plot.subtitle = element_text(hjust = .5)
+  )
+### 2018
+munics_18 <- munics_18 %>%
+  left_join(munic_18[,c("IL2","PROV", "MUNICIPIO")],
+            by = c("ine.prov.name"="PROV", "name"="MUNICIPIO"))
+plot_IL2_18 <- ggplot(munics_18) +
+  geom_sf(aes(fill = cut(IL2, breaks = breaks2, labels = labels2)), alpha = 0.9, color = NA) +
+  scale_fill_manual(
+    values = custom_colors2,
+    labels = labels2,
+    drop = FALSE,
+    na.translate = FALSE
+  ) +
+  labs(
+    fill = "IL (>65)",
+    title = "2018"
+  ) +
+  theme_void() +
+  theme(
+    plot.background = element_rect(fill = "grey80"),
+    text = element_text(face = "bold"),
+    plot.title = element_text(hjust = .5),
+    plot.subtitle = element_text(hjust = .5)
+  )
+### 2020
+munics_20 <- munics_20 %>%
+  left_join(munic_20[,c("IL2","PROV", "MUNICIPIO")],
+            by = c("ine.prov.name"="PROV", "name"="MUNICIPIO"))
+plot_IL2_20 <- ggplot(munics_20) +
+  geom_sf(aes(fill = cut(IL2, breaks = breaks2, labels = labels2)), alpha = 0.9, color = NA) +
+  scale_fill_manual(
+    values = custom_colors2,
+    labels = labels2,
+    drop = FALSE,
+    na.translate = FALSE
+  ) +
+  labs(
+    fill = "IL (>65)",
+    title = "2020"
+  ) +
+  theme_void() +
+  theme(
+    plot.background = element_rect(fill = "grey80"),
+    text = element_text(face = "bold"),
+    plot.title = element_text(hjust = .5),
+    plot.subtitle = element_text(hjust = .5)
+  )
+### 2022
+munics_22 <- munics_22 %>%
+  left_join(munic_22[,c("IL2","PROV", "MUNICIPIO")],
+            by = c("ine.prov.name"="PROV", "name"="MUNICIPIO"))
+plot_IL2_22 <- ggplot(munics_22) +
+  geom_sf(aes(fill = cut(IL2, breaks = breaks2, labels = labels2)), alpha = 0.9, color = NA) +
+  scale_fill_manual(
+    values = custom_colors2,
+    labels = labels2,
+    drop = FALSE,
+    na.translate = FALSE
+  ) +
+  labs(
+    fill = "IL (>65)",
+    title = "2022"
+  ) +
+  theme_void() +
+  theme(
+    plot.background = element_rect(fill = "grey80"),
+    text = element_text(face = "bold"),
+    plot.title = element_text(hjust = .5),
+    plot.subtitle = element_text(hjust = .5)
+  )
+# Combine all the plots
+grid.arrange( plot_IL2_12, plot_IL2_14, plot_IL2_16, plot_IL2_18, plot_IL2_20, plot_IL2_22, nrow = 3, ncol = 2, 
+             widths = unit(c(8,8), "cm"),
+             heights = unit(c(5, 5, 5), "cm"))
+### Tables
+wanted_cols <- c("year","MUNICIPIO", "PROV", "IL2")
+# 2012
+# Order by IL2 to get the largest values
+munic_12_sorted_desc <- munic_12[order(munic_12$IL2, decreasing = TRUE), ]
+# Extract the 6 largest values
+largest_12 <- head(munic_12_sorted_desc[,wanted_cols], 6)
+second_largest_12 <- munic_12_sorted_desc[,wanted_cols][7:12,]
+# Repeat the same for the remaining years and combine the dataframes conveniently
+# 2014
+munic_14_sorted_desc <- munic_14[order(munic_14$IL2, decreasing = TRUE), ]
+largest_14 <- head(munic_14_sorted_desc[,wanted_cols], 6)
+second_largest_14 <- munic_14_sorted_desc[,wanted_cols][7:12,]
+# 2016
+munic_16_sorted_desc <- munic_16[order(munic_16$IL2, decreasing = TRUE), ]
+largest_16 <- head(munic_16_sorted_desc[,wanted_cols], 6)
+second_largest_16 <- munic_16_sorted_desc[,wanted_cols][7:12,]
+# 2018
+munic_18_sorted_desc <- munic_18[order(munic_18$IL2, decreasing = TRUE), ]
+largest_18 <- head(munic_18_sorted_desc[,wanted_cols], 6)
+second_largest_18 <- munic_18_sorted_desc[,wanted_cols][7:12,]
+# 2020
+munic_20_sorted_desc <- munic_20[order(munic_20$IL2, decreasing = TRUE), ]
+largest_20 <- head(munic_20_sorted_desc[,wanted_cols], 6)
+second_largest_20 <- munic_20_sorted_desc[,wanted_cols][7:12,]
+# 2022
+munic_22_sorted_desc <- munic_22[order(munic_22$IL2, decreasing = TRUE), ]
+largest_22 <- head(munic_22_sorted_desc[,wanted_cols], 6)
+second_largest_22 <- munic_22_sorted_desc[,wanted_cols][7:12,]
+# Combination
+largest_IL2 <- rbind(largest_12,largest_14,largest_16,largest_18,
+                     largest_20,largest_22)
+second_largest_IL2 <- rbind(second_largest_12,second_largest_14,second_largest_16,second_largest_18,
+                     second_largest_20,second_largest_22)
+combination_IL2 <- cbind(largest_IL2,
+                        second_largest_IL2[,c("MUNICIPIO","PROV","IL2")])
+### Time series
+rello <- c(
+  munic_12[munic_12$MUNICIPIO == "Rello", "IL2"][[1]],
+  munic_14[munic_14$MUNICIPIO == "Rello", "IL2"][[1]],
+  munic_16[munic_16$MUNICIPIO == "Rello", "IL2"][[1]],
+  munic_18[munic_18$MUNICIPIO == "Rello", "IL2"][[1]],
+  munic_20[munic_20$MUNICIPIO == "Rello", "IL2"][[1]],
+  munic_22[munic_22$MUNICIPIO == "Rello", "IL2"][[1]]
+)
+requena_de_campos <- c(
+  munic_12[munic_12$MUNICIPIO == "Requena de Campos", "IL2"][[1]],
+  munic_14[munic_14$MUNICIPIO == "Requena de Campos", "IL2"][[1]],
+  munic_16[munic_16$MUNICIPIO == "Requena de Campos", "IL2"][[1]],
+  munic_18[munic_18$MUNICIPIO == "Requena de Campos", "IL2"][[1]],
+  munic_20[munic_20$MUNICIPIO == "Requena de Campos", "IL2"][[1]],#NA
+  munic_22[munic_22$MUNICIPIO == "Requena de Campos", "IL2"][[1]]#NA
+)
+requena_de_campos <- c(requena_de_campos, rep(NA,2))
+valle_de_bardaji <- c(
+  munic_12[munic_12$MUNICIPIO == "Valle de Bardají", "IL2"][[1]],
+  munic_14[munic_14$MUNICIPIO == "Valle de Bardají", "IL2"][[1]],
+  munic_16[munic_16$MUNICIPIO == "Valle de Bardají", "IL2"][[1]],
+  munic_18[munic_18$MUNICIPIO == "Valle de Bardají", "IL2"][[1]],
+  munic_20[munic_20$MUNICIPIO == "Valle de Bardají", "IL2"][[1]],
+  munic_22[munic_22$MUNICIPIO == "Valle de Bardají", "IL2"][[1]]
+)
+estriegana <- c(
+  munic_12[munic_12$MUNICIPIO=="Estriégana","IL2"][[1]], 
+            munic_14[munic_14$MUNICIPIO=="Estriégana","IL2"][[1]], 
+            munic_16[munic_16$MUNICIPIO=="Estriégana","IL2"][[1]], 
+            munic_18[munic_18$MUNICIPIO=="Estriégana","IL2"][[1]], 
+            munic_20[munic_20$MUNICIPIO=="Estriégana","IL2"][[1]], 
+            munic_22[munic_22$MUNICIPIO=="Estriégana","IL2"][[1]]
+  )
+caracena <- c(
+  munic_12[munic_12$MUNICIPIO == "Caracena", "IL2"][[1]],
+  munic_14[munic_14$MUNICIPIO == "Caracena", "IL2"][[1]],
+  munic_16[munic_16$MUNICIPIO == "Caracena", "IL2"][[1]],
+  munic_18[munic_18$MUNICIPIO == "Caracena", "IL2"][[1]],
+  munic_20[munic_20$MUNICIPIO == "Caracena", "IL2"][[1]],
+  munic_22[munic_22$MUNICIPIO == "Caracena", "IL2"][[1]]
+)
+somolinos <- c(
+  munic_12[munic_12$MUNICIPIO == "Somolinos", "IL2"][[1]],
+  munic_14[munic_14$MUNICIPIO == "Somolinos", "IL2"][[1]],
+  munic_16[munic_16$MUNICIPIO == "Somolinos", "IL2"][[1]],
+  munic_18[munic_18$MUNICIPIO == "Somolinos", "IL2"][[1]],
+  munic_20[munic_20$MUNICIPIO == "Somolinos", "IL2"][[1]],
+  munic_22[munic_22$MUNICIPIO == "Somolinos", "IL2"][[1]]
+)
+data_short <- data.frame(
+  Year = c(2012, 2014, 2016, 2018, 2020, 2022),
+  Rello = rello,
+  Requena_de_Campos = requena_de_campos,
+  Valle_de_Bardají = valle_de_bardaji,
+  Caracena = caracena,
+  Estriégana = estriegana,
+  Somolinos = somolinos
+)
+
+#################################################################################
+# LOCATION INDEX OF THE CENTENARIAN POPULATION AGES 85 AND ABOVE (MUNICIPALITIES)
+#################################################################################
+
+# 2012
+total_O12 <- sum(munic_12$older_85)
+munic_12$IL3 <- (munic_12$older_100/total_C12)/(munic_12$older_85/total_O12)
+# Distribution
+hist(munic_12$IL3, 
+     breaks=30,
+     main = "Histogram of IL (>85)",
+     xlab = "IL (>85)",
+     ylab = "Frequency",
+     col = "blue", 
+     border = "black") 
+# 2014
+total_O14 <- sum(munic_14$older_85)
+munic_14$IL3 <- (munic_14$older_100/total_C14)/(munic_14$older_85/total_O14)
+# 2016
+total_O16 <- sum(munic_16$older_85)
+munic_16$IL3 <- (munic_16$older_100/total_C16)/(munic_16$older_85/total_O16)
+# 2018
+total_O18 <- sum(munic_18$older_85)
+munic_18$IL3 <- (munic_18$older_100/total_C18)/(munic_18$older_85/total_O18)
+# 2020
+total_O20 <- sum(munic_20$older_85)
+munic_20$IL3 <- (munic_20$older_100/total_C20)/(munic_20$older_85/total_O20)
+# 2022
+total_O22 <- sum(munic_22$older_85)
+munic_22$IL3 <- (munic_22$older_100/total_C22)/(munic_22$older_85/total_O22)
+
+munics_12 <- munics_12 %>%
+  left_join(munic_12[,c("IL3","PROV", "MUNICIPIO")],
+            by = c("ine.prov.name"="PROV", "name"="MUNICIPIO"))
+custom_colors3 <- c("white", "wheat3","orange", "darkgreen")
+breaks3 <- c(-0.00001,0.00001, 1.5, 3.5, Inf)
+labels3 <- c("0", "0 - 1", "1 - 3", "> 3")
+
+plot_IL3_12 <- ggplot(munics_12) +
+  geom_sf(aes(fill = cut(IL3, breaks = breaks3, labels = labels3)), alpha = 0.9, color = NA) +
+  scale_fill_manual(
+    values = custom_colors3,
+    labels = labels3,
+    drop = FALSE,
+    na.translate = FALSE
+  ) +
+  labs(
+    fill = "IL (>85)",
+    title = "2012"
+  ) +
+  theme_void() +
+  theme(
+    plot.background = element_rect(fill = "grey80"),
+    text = element_text(face = "bold"),
+    plot.title = element_text(hjust = .5),
+    plot.subtitle = element_text(hjust = .5)
+  )
+### 2014
+munics_14 <- munics_14 %>%
+  left_join(munic_14[,c("IL3","PROV", "MUNICIPIO")],
+            by = c("ine.prov.name"="PROV", "name"="MUNICIPIO"))
+plot_IL3_14 <- ggplot(munics_14) +
+  geom_sf(aes(fill = cut(IL3, breaks = breaks3, labels = labels3)), alpha = 0.9, color = NA) +
+  scale_fill_manual(
+    values = custom_colors3,
+    labels = labels3,
+    drop = FALSE,
+    na.translate = FALSE
+  ) +
+  labs(
+    fill = "IL (>85)",
+    title = "2014"
+  ) +
+  theme_void() +
+  theme(
+    plot.background = element_rect(fill = "grey80"),
+    text = element_text(face = "bold"),
+    plot.title = element_text(hjust = .5),
+    plot.subtitle = element_text(hjust = .5)
+  )
+### 2016
+munics_16 <- munics_16 %>%
+  left_join(munic_16[,c("IL3","PROV", "MUNICIPIO")],
+            by = c("ine.prov.name"="PROV", "name"="MUNICIPIO"))
+plot_IL3_16 <- ggplot(munics_16) +
+  geom_sf(aes(fill = cut(IL3, breaks = breaks3, labels = labels3)), alpha = 0.9, color = NA) +
+  scale_fill_manual(
+    values = custom_colors3,
+    labels = labels3,
+    drop = FALSE,
+    na.translate = FALSE
+  ) +
+  labs(
+    fill = "IL (>85)",
+    title = "2016"
+  ) +
+  theme_void() +
+  theme(
+    plot.background = element_rect(fill = "grey80"),
+    text = element_text(face = "bold"),
+    plot.title = element_text(hjust = .5),
+    plot.subtitle = element_text(hjust = .5)
+  )
+### 2018
+munics_18 <- munics_18 %>%
+  left_join(munic_18[,c("IL3","PROV", "MUNICIPIO")],
+            by = c("ine.prov.name"="PROV", "name"="MUNICIPIO"))
+plot_IL3_18 <- ggplot(munics_18) +
+  geom_sf(aes(fill = cut(IL3, breaks = breaks3, labels = labels3)), alpha = 0.9, color = NA) +
+  scale_fill_manual(
+    values = custom_colors3,
+    labels = labels3,
+    drop = FALSE,
+    na.translate = FALSE
+  ) +
+  labs(
+    fill = "IL (>85)",
+    title = "2018"
+  ) +
+  theme_void() +
+  theme(
+    plot.background = element_rect(fill = "grey80"),
+    text = element_text(face = "bold"),
+    plot.title = element_text(hjust = .5),
+    plot.subtitle = element_text(hjust = .5)
+  )
+munics_20 <- munics_20 %>%
+  left_join(munic_20[,c("IL3","PROV", "MUNICIPIO")],
+            by = c("ine.prov.name"="PROV", "name"="MUNICIPIO"))
+
+plot_IL3_20 <- ggplot(munics_20) +
+  geom_sf(aes(fill = cut(IL3, breaks = breaks3, labels = labels3)), alpha = 0.9, color = NA) +
+  scale_fill_manual(
+    values = custom_colors3,
+    labels = labels3,
+    drop = FALSE,
+    na.translate = FALSE
+  ) +
+  labs(
+    fill = "IL (>85)",
+    title = "2020"
+  ) +
+  theme_void() +
+  theme(
+    plot.background = element_rect(fill = "grey80"),
+    text = element_text(face = "bold"),
+    plot.title = element_text(hjust = .5),
+    plot.subtitle = element_text(hjust = .5)
+  )
+### 2022
+munics_22 <- munics_22 %>%
+  left_join(munic_22[,c("IL3","PROV", "MUNICIPIO")],
+            by = c("ine.prov.name"="PROV", "name"="MUNICIPIO"))
+plot_IL3_22 <- ggplot(munics_22) +
+  geom_sf(aes(fill = cut(IL3, breaks = breaks3, labels = labels3)), alpha = 0.9, color = NA) +
+  scale_fill_manual(
+    values = custom_colors3,
+    labels = labels3,
+    drop = FALSE
+  ) +
+  labs(
+    fill = "IL (>85)",
+    title = "2022"
+  ) +
+  theme_void() +
+  theme(
+    plot.background = element_rect(fill = "grey80"),
+    text = element_text(face = "bold"),
+    plot.title = element_text(hjust = .5),
+    plot.subtitle = element_text(hjust = .5)
+  )
+# Combine all the plots
+grid.arrange( plot_IL3_12, plot_IL3_14, plot_IL3_16, plot_IL3_18, plot_IL3_20, plot_IL3_22, nrow = 3, ncol = 2, 
+             widths = unit(c(8,8), "cm"),
+             heights = unit(c(5, 5, 5), "cm"))
+### Tables
+wanted_cols <- c("year","MUNICIPIO", "PROV", "IL3")
+# 2012
+# Order by IL3 to get the largest values
+munic_12_sorted_desc <- munic_12[order(munic_12$IL3, decreasing = TRUE), ]
+# Extract the 6 largest values
+largest_12 <- head(munic_12_sorted_desc[,wanted_cols], 6)
+second_largest_12 <- munic_12_sorted_desc[,wanted_cols][7:12,]
+# Repeat the same for the remaining years and combine the dataframes conveniently
+# 2014
+munic_14_sorted_desc <- munic_14[order(munic_14$IL3, decreasing = TRUE), ]
+largest_14 <- head(munic_14_sorted_desc[,wanted_cols], 6)
+second_largest_14 <- munic_14_sorted_desc[,wanted_cols][7:12,]
+# 2016
+munic_16_sorted_desc <- munic_16[order(munic_16$IL3, decreasing = TRUE), ]
+largest_16 <- head(munic_16_sorted_desc[,wanted_cols], 6)
+second_largest_16 <- munic_16_sorted_desc[,wanted_cols][7:12,]
+# 2018
+munic_18_sorted_desc <- munic_18[order(munic_18$IL3, decreasing = TRUE), ]
+largest_18 <- head(munic_18_sorted_desc[,wanted_cols], 6)
+second_largest_18 <- munic_18_sorted_desc[,wanted_cols][7:12,]
+# 2020
+munic_20_sorted_desc <- munic_20[order(munic_20$IL3, decreasing = TRUE), ]
+largest_20 <- head(munic_20_sorted_desc[,wanted_cols], 6)
+second_largest_20 <- munic_20_sorted_desc[,wanted_cols][7:12,]
+# 2022
+munic_22_sorted_desc <- munic_22[order(munic_22$IL3, decreasing = TRUE), ]
+largest_22 <- head(munic_22_sorted_desc[,wanted_cols], 6)
+second_largest_22 <- munic_22_sorted_desc[,wanted_cols][7:12,]
+# Combination
+largest_IL3 <- rbind(largest_12,largest_14,largest_16,largest_18,
+                     largest_20,largest_22)
+second_largest_IL3 <- rbind(second_largest_12,second_largest_14,second_largest_16,second_largest_18,
+                     second_largest_20,second_largest_22)
+combination_IL3 <- cbind(largest_IL3,
+                        second_largest_IL3[,c("MUNICIPIO","PROV","IL3")])
+### Time series
+albendiego <- c(
+  munic_12[munic_12$MUNICIPIO == "Albendiego", "IL3"][[1]],
+  munic_14[munic_14$MUNICIPIO == "Albendiego", "IL3"][[1]],
+  munic_16[munic_16$MUNICIPIO == "Albendiego", "IL3"][[1]],
+  munic_18[munic_18$MUNICIPIO == "Albendiego", "IL3"][[1]],
+  munic_20[munic_20$MUNICIPIO == "Albendiego", "IL3"][[1]],
+  munic_22[munic_22$MUNICIPIO == "Albendiego", "IL3"][[1]]
+)
+berdejo <- c(
+  munic_12[munic_12$MUNICIPIO == "Berdejo", "IL3"][[1]],
+  munic_14[munic_14$MUNICIPIO == "Berdejo", "IL3"][[1]],
+  munic_16[munic_16$MUNICIPIO == "Berdejo", "IL3"][[1]],
+  munic_18[munic_18$MUNICIPIO == "Berdejo", "IL3"][[1]],
+  munic_20[munic_20$MUNICIPIO == "Berdejo", "IL3"][[1]],#NA
+  munic_22[munic_22$MUNICIPIO == "Berdejo", "IL3"][[1]] #NA
+)
+berdejo <- c(berdejo, rep(NA,2))
+jatiel <- c(
+  munic_12[munic_12$MUNICIPIO == "Jatiel", "IL3"][[1]],
+  munic_14[munic_14$MUNICIPIO == "Jatiel", "IL3"][[1]],
+  munic_16[munic_16$MUNICIPIO == "Jatiel", "IL3"][[1]],
+  munic_18[munic_18$MUNICIPIO == "Jatiel", "IL3"][[1]],
+  munic_20[munic_20$MUNICIPIO == "Jatiel", "IL3"][[1]],#NA
+  munic_22[munic_22$MUNICIPIO == "Jatiel", "IL3"][[1]]#NA
+)
+jatiel <- c(jatiel, rep(NA,2))
+olmedilla <- c(
+  munic_12[munic_12$MUNICIPIO == "Olmedilla de Eliz", "IL3"][[1]],
+  munic_14[munic_14$MUNICIPIO == "Olmedilla de Eliz", "IL3"][[1]],
+  munic_16[munic_16$MUNICIPIO == "Olmedilla de Eliz", "IL3"][[1]],
+  munic_18[munic_18$MUNICIPIO == "Olmedilla de Eliz", "IL3"][[1]],
+  munic_20[munic_20$MUNICIPIO == "Olmedilla de Eliz", "IL3"][[1]],
+  munic_22[munic_22$MUNICIPIO == "Olmedilla de Eliz", "IL3"][[1]]
+)
+olmedilla <- c(olmedilla[1], NA, olmedilla[2],olmedilla[3], rep(NA,2))
+castroserracin <- c(
+  munic_12[munic_12$MUNICIPIO == "Castroserracín", "IL3"][[1]],
+  munic_14[munic_14$MUNICIPIO == "Castroserracín", "IL3"][[1]],
+  munic_16[munic_16$MUNICIPIO == "Castroserracín", "IL3"][[1]],
+  munic_18[munic_18$MUNICIPIO == "Castroserracín", "IL3"][[1]],
+  munic_20[munic_20$MUNICIPIO == "Castroserracín", "IL3"][[1]],
+  munic_22[munic_22$MUNICIPIO == "Castroserracín", "IL3"][[1]]
+)
+carazo <- c(
+  munic_12[munic_12$MUNICIPIO == "Carazo", "IL3"][[1]],
+  munic_14[munic_14$MUNICIPIO == "Carazo", "IL3"][[1]],
+  munic_16[munic_16$MUNICIPIO == "Carazo", "IL3"][[1]],
+  munic_18[munic_18$MUNICIPIO == "Carazo", "IL3"][[1]],
+  munic_20[munic_20$MUNICIPIO == "Carazo", "IL3"][[1]],
+  munic_22[munic_22$MUNICIPIO == "Carazo", "IL3"][[1]]
+)
+data_short <- data.frame(
+  Year = c(2012, 2014, 2016, 2018, 2020, 2022),
+  Albendiego = albendiego,
+  Berdejo = berdejo,
+  Jatiel = jatiel,
+  Olmedilla_de_Eliz = olmedilla,
+  Castroserracín = castroserracin,
+  Carazo = carazo
+)
+# TIME SERIES
+data_long <- gather(data_short, key = "Municipality", value = "LocationIndex", -Year)
+ggplot(data_long, aes(x = Year, y = LocationIndex, color = Municipality, group = Municipality)) +
+  geom_line(linewidth = 1) +
+  geom_point(linewidth = 2) +
+  scale_x_continuous(
+    breaks = c(2012, 2014, 2016, 2018, 2020, 2022)
+  ) +
+  labs(title = NULL,
+       x = "Year",
+       y = "IL(>85)",
+       color = "Municipality") +
+  theme_minimal()+
+  theme(
+    legend.text = element_text(size = 18),    # Increase the legend text size
+    legend.title = element_text(size = 18)    # Increase the legend title size
+  )
+
+############################################################
+# SEX RATIO AGES 65 AND ABOVE (MUNICIPALITIES)
+############################################################
+
+# Create 6 new variables: Totalm>65, Totalf>65, Totalm>85, Totalf>85,
+# Totalm>100, Totalf>100
+data$Totalm_65 <- data$m_65_69+data$m_70_74+data$m_75_79+data$m_80_84+
+  data$m_85_89+data$m_90_94+data$m_95_99+data$m_100
+
+data$Totalf_65 <- data$f_65_69+data$f_70_74+data$f_75_79+data$f_80_84+
+  data$f_85_89+data$f_90_94+data$f_95_99+data$f_100
+
+data$Totalm_85 <-data$m_85_89+data$m_90_94+data$m_95_99+data$m_100
+
+data$Totalf_85 <-data$f_85_89+data$f_90_94+data$f_95_99+data$f_100
+# Summarize by municipality and Year
+mf_munic <- data %>%
+  group_by(PROV, MUNICIPIO, year) %>%
+  summarize(olderm_65 = sum(Totalm_65),
+            olderf_65 = sum(Totalf_65),
+            olderm_85 = sum(Totalm_85),
+            olderf_85 = sum(Totalf_85),
+            olderm_100 = sum(m_100),
+            olderf_100 = sum(f_100))
+# Print the resulting dataframe
+print(mf_munic)
+
+# Compute SEX RATIO for every year
+# 2012
+mf_12 <- mf_munic[mf_munic$year==2012,]
+mf_12$SR_65 <- mf_12$olderm_65/mf_12$olderf_65*100
+mf_12$SR_85 <- mf_12$olderm_85/mf_12$olderf_85*100
+mf_12$SR_100 <- mf_12$olderm_100/mf_12$olderf_100*100
+any(is.na(mf_12$SR_65))
+any(is.na(mf_12$SR_85))
+any(is.na(mf_12$SR_100))
+# Check the distribution of SR
+par(mfrow=c(1,3))
+hist(mf_12$SR_65, 
+     breaks=30,
+     main = "Histogram of SR (>65)",
+     xlab = "SR",
+     ylab = "Frequency",
+     col = "blue",
+     border = "black")
+hist(mf_12$SR_85, 
+     breaks=30,
+     main = "Histogram of SR (>85)",
+     xlab = "SR",
+     ylab = "Frequency",
+     col = "blue",
+     border = "black")
+hist(mf_12$SR_100, 
+     breaks=30,
+     main = "Histogram of SR (>100)",
+     xlab = "SR",
+     ylab = "Frequency",
+     col = "blue",
+     border = "black")
+par(mfrow=c(1,1))
+
+# 2014
+mf_14 <- mf_munic[mf_munic$year==2014,]
+mf_14$SR_65 <- mf_14$olderm_65/mf_14$olderf_65*100
+mf_14$SR_85 <- mf_14$olderm_85/mf_14$olderf_85*100
+mf_14$SR_100 <- mf_14$olderm_100/mf_14$olderf_100*100
+
+# 2016
+mf_16 <- mf_munic[mf_munic$year==2016,]
+mf_16$SR_65 <- mf_16$olderm_65/mf_16$olderf_65*100
+mf_16$SR_85 <- mf_16$olderm_85/mf_16$olderf_85*100
+mf_16$SR_100 <- mf_16$olderm_100/mf_16$olderf_100*100
+
+# 2018
+mf_18 <- mf_munic[mf_munic$year==2018,]
+mf_18$SR_65 <- mf_18$olderm_65/mf_18$olderf_65*100
+mf_18$SR_85 <- mf_18$olderm_85/mf_18$olderf_85*100
+mf_18$SR_100 <- mf_18$olderm_100/mf_18$olderf_100*100
+
+# 2020
+mf_20 <- mf_munic[mf_munic$year==2020,]
+mf_20$SR_65 <- mf_20$olderm_65/mf_20$olderf_65*100
+mf_20$SR_85 <- mf_20$olderm_85/mf_20$olderf_85*100
+mf_20$SR_100 <- mf_20$olderm_100/mf_20$olderf_100*100
+
+# 2022
+mf_22 <- mf_munic[mf_munic$year==2022,]
+mf_22$SR_65 <- mf_22$olderm_65/mf_22$olderf_65*100
+mf_22$SR_85 <- mf_22$olderm_85/mf_22$olderf_85*100
+mf_22$SR_100 <- mf_22$olderm_100/mf_22$olderf_100*100
+
+# Plot SR 2012
+mf_12$MUNICIPIO <- as.character(mf_12$MUNICIPIO)
+mf_12$PROV <- as.character(mf_12$PROV)
+munics_12 <- munics_12 %>%
+  left_join(mf_12[,c("SR_65", "SR_85", "SR_100", "PROV", "MUNICIPIO")],
+            by = c("ine.prov.name"="PROV", "name"="MUNICIPIO"))
+custom_colors_65 <- c("white", "wheat3","salmon2","orange", "darkgreen")
+breaks_65 <- c(-0.0001, 50, 80, 100, 200, Inf)  
+labels_65 <- c("0% - 50%", "50% - 80%", "80% - 100%","100% - 200%", "> 200%")
+plot_SR65_12 <- ggplot(munics_12) +
+  geom_sf(aes(fill = cut(SR_65.y, breaks = breaks_65, labels = labels_65)), alpha = 0.9, color = NA) +
+  scale_fill_manual(
+    values = custom_colors_65,
+    labels = labels_65,
+    drop = FALSE,
+    na.translate = FALSE
+  ) +
+  labs(
+    fill = "SR (>65)",
+    title = "2012"
+  ) +
+  theme_void() +
+  theme(
+    plot.background = element_rect(fill = "grey80"),
+    text = element_text(face = "bold"),
+    plot.title = element_text(hjust = .5),
+    plot.subtitle = element_text(hjust = .5)
+  )
+### 2014
+# Plot SR 2014
+mf_14$MUNICIPIO <- as.character(mf_14$MUNICIPIO)
+mf_14$PROV <- as.character(mf_14$PROV)
+munics_14 <- munics_14 %>%
+  left_join(mf_14[,c("SR_65", "SR_85", "SR_100", "PROV", "MUNICIPIO")],
+            by = c("ine.prov.name"="PROV", "name"="MUNICIPIO"))
+plot_SR65_14 <- ggplot(munics_14) +
+  geom_sf(aes(fill = cut(SR_65, breaks = breaks_65, labels = labels_65)), alpha = 0.9, color = NA) +
+  scale_fill_manual(
+    values = custom_colors_65,
+    labels = labels_65,
+    drop = FALSE,
+    na.translate = FALSE
+  ) +
+  labs(
+    fill = "SR (>65)",
+    title = "2014"
+  ) +
+  theme_void() +
+  theme(
+    plot.background = element_rect(fill = "grey80"),
+    text = element_text(face = "bold"),
+    plot.title = element_text(hjust = .5),
+    plot.subtitle = element_text(hjust = .5)
+  )
+### 2016
+mf_16$MUNICIPIO <- as.character(mf_16$MUNICIPIO)
+mf_16$PROV <- as.character(mf_16$PROV)
+munics_16 <- munics_16 %>%
+  left_join(mf_16[,c("SR_65", "SR_85", "SR_100", "PROV", "MUNICIPIO")],
+            by = c("ine.prov.name"="PROV", "name"="MUNICIPIO"))
+plot_SR65_16 <- ggplot(munics_16) +
+  geom_sf(aes(fill = cut(SR_65, breaks = breaks_65, labels = labels_65)), alpha = 0.9, color = NA) +
+  scale_fill_manual(
+    values = custom_colors_65,
+    labels = labels_65,
+    drop = FALSE,
+    na.translate = FALSE
+  ) +
+  labs(
+    fill = "SR (>65)",
+    title = "2016"
+  ) +
+  theme_void() +
+  theme(
+    plot.background = element_rect(fill = "grey80"),
+    text = element_text(face = "bold"),
+    plot.title = element_text(hjust = .5),
+    plot.subtitle = element_text(hjust = .5)
+  )
+### 2018
+mf_18$MUNICIPIO <- as.character(mf_18$MUNICIPIO)
+mf_18$PROV <- as.character(mf_18$PROV)
+munics_18 <- munics_18 %>%
+  left_join(mf_18[,c("SR_65", "SR_85", "SR_100", "PROV", "MUNICIPIO")],
+            by = c("ine.prov.name"="PROV", "name"="MUNICIPIO"))
+plot_SR65_18 <- ggplot(munics_18) +
+  geom_sf(aes(fill = cut(SR_65, breaks = breaks_65, labels = labels_65)), alpha = 0.9, color = NA) +
+  scale_fill_manual(
+    values = custom_colors_65,
+    labels = labels_65,
+    drop = FALSE,
+    na.translate = FALSE
+  ) +
+  labs(
+    fill = "SR (>65)",
+    title = "2018"
+  ) +
+  theme_void() +
+  theme(
+    plot.background = element_rect(fill = "grey80"),
+    text = element_text(face = "bold"),
+    plot.title = element_text(hjust = .5),
+    plot.subtitle = element_text(hjust = .5)
+  )
+### 2020
+mf_20$MUNICIPIO <- as.character(mf_20$MUNICIPIO)
+mf_20$PROV <- as.character(mf_20$PROV)
+munics_20 <- munics_20 %>%
+  left_join(mf_20[,c("SR_65", "SR_85", "SR_100", "PROV", "MUNICIPIO")],
+            by = c("ine.prov.name"="PROV", "name"="MUNICIPIO"))
+plot_SR65_20 <- ggplot(munics_20) +
+  geom_sf(aes(fill = cut(SR_65, breaks = breaks_65, labels = labels_65)), alpha = 0.9, color = NA) +
+  scale_fill_manual(
+    values = custom_colors_65,
+    labels = labels_65,
+    drop = FALSE,
+    na.translate = FALSE
+  ) +
+  labs(
+    fill = "SR (>65)",
+    title = "2020"
+  ) +
+  theme_void() +
+  theme(
+    plot.background = element_rect(fill = "grey80"),
+    text = element_text(face = "bold"),
+    plot.title = element_text(hjust = .5),
+    plot.subtitle = element_text(hjust = .5)
+  )
+### 2022
+mf_22$MUNICIPIO <- as.character(mf_22$MUNICIPIO)
+mf_22$PROV <- as.character(mf_22$PROV)
+munics_22 <- munics_22 %>%
+  left_join(mf_22[,c("SR_65", "SR_85", "SR_100", "PROV", "MUNICIPIO")],
+            by = c("ine.prov.name"="PROV", "name"="MUNICIPIO"))
+lot_SR65_22 <- ggplot(munics_22) +
+  geom_sf(aes(fill = cut(SR_65, breaks = breaks_65, labels = labels_65)), alpha = 0.9, color = NA) +
+  scale_fill_manual(
+    values = custom_colors_65,
+    labels = labels_65,
+    drop = FALSE,
+    na.translate = FALSE
+  ) +
+  labs(
+    fill = "SR (>65)",
+    title = "2022"
+  ) +
+  theme_void() +
+  theme(
+    plot.background = element_rect(fill = "grey80"),
+    text = element_text(face = "bold"),
+    plot.title = element_text(hjust = .5),
+    plot.subtitle = element_text(hjust = .5)
+  )
+# Combine all the plots
+grid.arrange( plot_SR65_12, plot_SR65_14, plot_SR65_16, plot_SR65_18, plot_SR65_20, plot_SR65_22, nrow = 3, ncol = 2, 
+             widths = unit(c(8,8), "cm"),
+             heights = unit(c(5, 5, 5), "cm"))
+### Tables
+wanted_cols <- c("year","MUNICIPIO", "PROV", "SR_65")
+# Function to filter out Inf values and get the largest values
+get_largest_sr <- function(df, wanted_cols) {
+  df_filtered <- df[is.finite(df$SR_65), ]  # Exclude Inf values
+  df_sorted <- df_filtered[order(df_filtered$SR_65, decreasing = TRUE), ]  # Order by SR_65
+  head(df_sorted[, wanted_cols], 6)  # Extract the 6 largest values
+}
+# 2012
+largest_12 <- get_largest_sr(mf_12, wanted_cols)
+# 2014
+largest_14 <- get_largest_sr(mf_14, wanted_cols)
+# 2016
+largest_16 <- get_largest_sr(mf_16, wanted_cols)
+# 2018
+largest_18 <- get_largest_sr(mf_18, wanted_cols)
+# 2020
+largest_20 <- get_largest_sr(mf_20, wanted_cols)
+# 2022
+largest_22 <- get_largest_sr(mf_22, wanted_cols)
+# Combination
+largest_SR_65 <- rbind(largest_12, largest_14, largest_16, largest_18, largest_20, largest_22)
+
+### Time series
+berceruelo <- c(
+  mf_12[mf_12$MUNICIPIO == "Berceruelo", "SR_65"][[1]],
+  mf_14[mf_14$MUNICIPIO == "Berceruelo", "SR_65"][[1]],
+  mf_16[mf_16$MUNICIPIO == "Berceruelo", "SR_65"][[1]],
+  mf_18[mf_18$MUNICIPIO == "Berceruelo", "SR_65"][[1]],
+  mf_20[mf_20$MUNICIPIO == "Berceruelo", "SR_65"][[1]],
+  mf_22[mf_22$MUNICIPIO == "Berceruelo", "SR_65"][[1]]
+)
+bañosdetajo <- c(
+  mf_12[mf_12$MUNICIPIO == "Baños de Tajo", "SR_65"][[1]],
+  mf_14[mf_14$MUNICIPIO == "Baños de Tajo", "SR_65"][[1]],
+  mf_16[mf_16$MUNICIPIO == "Baños de Tajo", "SR_65"][[1]],
+  mf_18[mf_18$MUNICIPIO == "Baños de Tajo", "SR_65"][[1]],
+  mf_20[mf_20$MUNICIPIO == "Baños de Tajo", "SR_65"][[1]],
+  mf_22[mf_22$MUNICIPIO == "Baños de Tajo", "SR_65"][[1]]
+)
+retiendas <- c(
+  mf_12[mf_12$MUNICIPIO == "Retiendas", "SR_65"][[1]],
+  mf_14[mf_14$MUNICIPIO == "Retiendas", "SR_65"][[1]],
+  mf_16[mf_16$MUNICIPIO == "Retiendas", "SR_65"][[1]],
+  mf_18[mf_18$MUNICIPIO == "Retiendas", "SR_65"][[1]],
+  mf_20[mf_20$MUNICIPIO == "Retiendas", "SR_65"][[1]],
+  mf_22[mf_22$MUNICIPIO == "Retiendas", "SR_65"][[1]]
+)
+abaurrepea <- c(
+  mf_12[mf_12$MUNICIPIO == "Abaurrepea/Abaurrea Baja", "SR_65"][[1]],
+  mf_14[mf_14$MUNICIPIO == "Abaurrepea/Abaurrea Baja", "SR_65"][[1]],
+  mf_16[mf_16$MUNICIPIO == "Abaurrepea/Abaurrea Baja", "SR_65"][[1]],
+  mf_18[mf_18$MUNICIPIO == "Abaurrepea/Abaurrea Baja", "SR_65"][[1]],
+  mf_20[mf_20$MUNICIPIO == "Abaurrepea/Abaurrea Baja", "SR_65"][[1]],
+  mf_22[mf_22$MUNICIPIO == "Abaurrepea/Abaurrea Baja", "SR_65"][[1]]
+)
+ledesma <- c(
+  mf_12[mf_12$MUNICIPIO == "Ledesma de la Cogolla", "SR_65"][[1]],
+  mf_14[mf_14$MUNICIPIO == "Ledesma de la Cogolla", "SR_65"][[1]],
+  mf_16[mf_16$MUNICIPIO == "Ledesma de la Cogolla", "SR_65"][[1]],
+  mf_18[mf_18$MUNICIPIO == "Ledesma de la Cogolla", "SR_65"][[1]],
+  mf_20[mf_20$MUNICIPIO == "Ledesma de la Cogolla", "SR_65"][[1]],
+  mf_22[mf_22$MUNICIPIO == "Ledesma de la Cogolla", "SR_65"][[1]]
+)
+mierla <- c(
+  mf_12[mf_12$MUNICIPIO == "La Mierla", "SR_65"][[1]],
+  mf_14[mf_14$MUNICIPIO == "La Mierla", "SR_65"][[1]],
+  mf_16[mf_16$MUNICIPIO == "La Mierla", "SR_65"][[1]],
+  mf_18[mf_18$MUNICIPIO == "La Mierla", "SR_65"][[1]],
+  mf_20[mf_20$MUNICIPIO == "La Mierla", "SR_65"][[1]],
+  mf_22[mf_22$MUNICIPIO == "La Mierla", "SR_65"][[1]]
+)
+data_short <- data.frame(
+  Year = c(2012, 2014, 2016, 2018, 2020, 2022),
+  Berceruelo = berceruelo,
+  Baños_de_Tajo = bañosdetajo,
+  Retiendas = retiendas,
+  Abaurrepea_Abaurrea_Baja = abaurrepea,
+  Ledesma_de_la_Cogolla = ledesma,
+  La_Mierla = mierla
+)
+# TIME SERIES
+# Reshape data to long format
+data_long <- gather(data_short, key = "Municipality", value = "LocationIndex", -Year)
+
+# Create the plot
+ggplot(data_long, aes(x = Year, y = LocationIndex, color = Municipality, group = Municipality)) +
+  geom_line(linewidth = 1) +
+  geom_point(linewidth = 2) +
+  scale_x_continuous(
+    breaks = c(2012, 2014, 2016, 2018, 2020, 2022)
+  ) +
+  labs(title = NULL,
+       x = "Year",
+       y = "SR(>65)",
+       color = "Municipality") +
+  theme_minimal()+
+  theme(
+    legend.text = element_text(size = 18),    
+    legend.title = element_text(size = 18)    
+  )
+
+######################################################################
+# SEX RATIO AGES 85 AND ABOVE (MUNICIPALITIES)
+######################################################################
+
+custom_colors_85 <- c("white", "wheat3","salmon2","orange", "darkgreen")
+breaks_85 <- c(-0.0001, 40, 60, 100, 200, Inf)  
+labels_85 <- c("0% - 40%", "40% - 60%", "60% - 100%","100% - 200%", "> 200%")
+
+plot_SR85_12 <- ggplot(munics_12) +
+  geom_sf(aes(fill = cut(SR_85.y, breaks = breaks_85, labels = labels_85)), alpha = 0.9, color = NA) +
+  scale_fill_manual(
+    values = custom_colors_85,
+    labels = labels_85,
+    drop = FALSE,
+    na.translate = FALSE
+  ) +
+  labs(
+    fill = "SR (>85)",
+    title = "2012"
+  ) +
+  theme_void() +
+  theme(
+    plot.background = element_rect(fill = "grey80"),
+    text = element_text(face = "bold"),
+    plot.title = element_text(hjust = .5),
+    plot.subtitle = element_text(hjust = .5)
+  )
+### 2014
+plot_SR85_14 <- ggplot(munics_14) +
+  geom_sf(aes(fill = cut(SR_85, breaks = breaks_85, labels = labels_85)), alpha = 0.9, color = NA) +
+  scale_fill_manual(
+    values = custom_colors_85,
+    labels = labels_85,
+    drop = FALSE,
+    na.translate = FALSE
+  ) +
+  labs(
+    fill = "SR (>85)",
+    title = "2014"
+  ) +
+  theme_void() +
+  theme(
+    plot.background = element_rect(fill = "grey80"),
+    text = element_text(face = "bold"),
+    plot.title = element_text(hjust = .5),
+    plot.subtitle = element_text(hjust = .5)
+  )
+### 2016
+plot_SR85_16 <- ggplot(munics_16) +
+  geom_sf(aes(fill = cut(SR_85, breaks = breaks_85, labels = labels_85)), alpha = 0.9, color = NA) +
+  scale_fill_manual(
+    values = custom_colors_85,
+    labels = labels_85,
+    drop = FALSE,
+    na.translate = FALSE
+  ) +
+  labs(
+    fill = "SR (>85)",
+    title = "2016"
+  ) +
+  theme_void() +
+  theme(
+    plot.background = element_rect(fill = "grey80"),
+    text = element_text(face = "bold"),
+    plot.title = element_text(hjust = .5),
+    plot.subtitle = element_text(hjust = .5)
+  )
+### 2018
+plot_SR85_18 <- ggplot(munics_18) +
+  geom_sf(aes(fill = cut(SR_85, breaks = breaks_85, labels = labels_85)), alpha = 0.9, color = NA) +
+  scale_fill_manual(
+    values = custom_colors_85,
+    labels = labels_85,
+    drop = FALSE,
+    na.translate = FALSE
+  ) +
+  labs(
+    fill = "SR (>85)",
+    title = "2018"
+  ) +
+  theme_void() +
+  theme(
+    plot.background = element_rect(fill = "grey80"),
+    text = element_text(face = "bold"),
+    plot.title = element_text(hjust = .5),
+    plot.subtitle = element_text(hjust = .5)
+  )
+### 2020
+plot_SR85_20 <- ggplot(munics_20) +
+  geom_sf(aes(fill = cut(SR_85, breaks = breaks_85, labels = labels_85)), alpha = 0.9, color = NA) +
+  scale_fill_manual(
+    values = custom_colors_85,
+    labels = labels_85,
+    drop = FALSE,
+    na.translate = FALSE
+  ) +
+  labs(
+    fill = "SR (>85)",
+    title = "2020"
+  ) +
+  theme_void() +
+  theme(
+    plot.background = element_rect(fill = "grey80"),
+    text = element_text(face = "bold"),
+    plot.title = element_text(hjust = .5),
+    plot.subtitle = element_text(hjust = .5)
+  )
+### 2022
+plot_SR85_22 <- ggplot(munics_22) +
+  geom_sf(aes(fill = cut(SR_85, breaks = breaks_85, labels = labels_85)), alpha = 0.9, color = NA) +
+  scale_fill_manual(
+    values = custom_colors_85,
+    labels = labels_85,
+    drop = FALSE,
+    na.translate = FALSE
+  ) +
+  labs(
+    fill = "SR (>85)",
+    title = "2022"
+  ) +
+  theme_void() +
+  theme(
+    plot.background = element_rect(fill = "grey80"),
+    text = element_text(face = "bold"),
+    plot.title = element_text(hjust = .5),
+    plot.subtitle = element_text(hjust = .5)
+  )
+# Combine all the plots
+grid.arrange( plot_SR85_12, plot_SR85_14, plot_SR85_16, plot_SR85_18, plot_SR85_20, plot_SR85_22, nrow = 3, ncol = 2, 
+             widths = unit(c(8,8), "cm"),
+             heights = unit(c(5, 5, 5), "cm"))
+### Tables
+wanted_cols <- c("year","MUNICIPIO", "PROV", "SR_85")
+# Function to filter out Inf values and get the largest values
+get_largest_sr <- function(df, wanted_cols) {
+  df_filtered <- df[is.finite(df$SR_85), ]  # Exclude Inf values
+  df_sorted <- df_filtered[order(df_filtered$SR_85, decreasing = TRUE), ]  # Order by SR_65
+  head(df_sorted[, wanted_cols], 6)  # Extract the 6 largest values
+}
+# 2012
+largest_12 <- get_largest_sr(mf_12, wanted_cols)
+# 2014
+largest_14 <- get_largest_sr(mf_14, wanted_cols)
+# 2016
+largest_16 <- get_largest_sr(mf_16, wanted_cols)
+# 2018
+largest_18 <- get_largest_sr(mf_18, wanted_cols)
+# 2020
+largest_20 <- get_largest_sr(mf_20, wanted_cols)
+# 2022
+largest_22 <- get_largest_sr(mf_22, wanted_cols)
+# Combination
+largest_SR_85 <- rbind(largest_12, largest_14, largest_16, largest_18, largest_20, largest_22)
+### Time series
+benissoda <- c(
+  mf_12[mf_12$MUNICIPIO == "Benissoda", "SR_85"][[1]],
+  mf_14[mf_14$MUNICIPIO == "Benissoda", "SR_85"][[1]],
+  mf_16[mf_16$MUNICIPIO == "Benissoda", "SR_85"][[1]],
+  mf_18[mf_18$MUNICIPIO == "Benissoda", "SR_85"][[1]],
+  mf_20[mf_20$MUNICIPIO == "Benissoda", "SR_85"][[1]],
+  mf_22[mf_22$MUNICIPIO == "Benissoda", "SR_85"][[1]]
+)
+alamedadelvalle <- c(
+  mf_12[mf_12$MUNICIPIO == "Alameda del Valle", "SR_85"][[1]],
+  mf_14[mf_14$MUNICIPIO == "Alameda del Valle", "SR_85"][[1]],
+  mf_16[mf_16$MUNICIPIO == "Alameda del Valle", "SR_85"][[1]],
+  mf_18[mf_18$MUNICIPIO == "Alameda del Valle", "SR_85"][[1]],
+  mf_20[mf_20$MUNICIPIO == "Alameda del Valle", "SR_85"][[1]],
+  mf_22[mf_22$MUNICIPIO == "Alameda del Valle", "SR_85"][[1]]
+)
+laspaules <- c(
+  mf_12[mf_12$MUNICIPIO == "Laspaúles", "SR_85"][[1]],
+  mf_14[mf_14$MUNICIPIO == "Laspaúles", "SR_85"][[1]],
+  mf_16[mf_16$MUNICIPIO == "Laspaúles", "SR_85"][[1]],
+  mf_18[mf_18$MUNICIPIO == "Laspaúles", "SR_85"][[1]],
+  mf_20[mf_20$MUNICIPIO == "Laspaúles", "SR_85"][[1]],
+  mf_22[mf_22$MUNICIPIO == "Laspaúles", "SR_85"][[1]]
+)
+granja <- c(
+  mf_12[mf_12$MUNICIPIO == "la Granja de la Costera", "SR_85"][[1]],
+  mf_14[mf_14$MUNICIPIO == "la Granja de la Costera", "SR_85"][[1]],
+  mf_16[mf_16$MUNICIPIO == "la Granja de la Costera", "SR_85"][[1]],
+  mf_18[mf_18$MUNICIPIO == "la Granja de la Costera", "SR_85"][[1]],
+  mf_20[mf_20$MUNICIPIO == "la Granja de la Costera", "SR_85"][[1]],
+  mf_22[mf_22$MUNICIPIO == "la Granja de la Costera", "SR_85"][[1]]
+)
+barcabo <- c(
+  mf_12[mf_12$MUNICIPIO == "Bárcabo", "SR_85"][[1]],
+  mf_14[mf_14$MUNICIPIO == "Bárcabo", "SR_85"][[1]],
+  mf_16[mf_16$MUNICIPIO == "Bárcabo", "SR_85"][[1]],
+  mf_18[mf_18$MUNICIPIO == "Bárcabo", "SR_85"][[1]],
+  mf_20[mf_20$MUNICIPIO == "Bárcabo", "SR_85"][[1]],
+  mf_22[mf_22$MUNICIPIO == "Bárcabo", "SR_85"][[1]]
+)
+altzo <- c(
+  mf_12[mf_12$MUNICIPIO == "Altzo", "SR_85"][[1]],
+  mf_14[mf_14$MUNICIPIO == "Altzo", "SR_85"][[1]],
+  mf_16[mf_16$MUNICIPIO == "Altzo", "SR_85"][[1]],
+  mf_18[mf_18$MUNICIPIO == "Altzo", "SR_85"][[1]],
+  mf_20[mf_20$MUNICIPIO == "Altzo", "SR_85"][[1]],
+  mf_22[mf_22$MUNICIPIO == "Altzo", "SR_85"][[1]]
+)
+data_short <- data.frame(
+  Year = c(2012, 2014, 2016, 2018, 2020, 2022),
+  Benissoda = benissoda,
+  Alameda_del_Valle = alamedadelvalle,
+  Laspaúles = laspaules,
+  la_Granja_de_la_Costera = granja,
+  Bárcabo = barcabo,
+  Altzo = altzo
+)
+# TIME SERIES
+data_long <- gather(data_short, key = "Municipality", value = "LocationIndex", -Year)
+ggplot(data_long, aes(x = Year, y = LocationIndex, color = Municipality, group = Municipality)) +
+  geom_line(linewidth = 1) +
+  geom_point(linewidth = 2) +
+  scale_x_continuous(
+    breaks = c(2012, 2014, 2016, 2018, 2020, 2022)
+  ) +
+  labs(title = NULL,
+       x = "Year",
+       y = "SR(>85)",
+       color = "Municipality") +
+  theme_minimal()+
+  theme(
+    legend.text = element_text(size = 18),    # Increase the legend text size
+    legend.title = element_text(size = 18)    # Increase the legend title size
+  )
+
+########################################################################
+# SEX RATIO FOR CENTENARIANS (MUNICIPALITIES)
+########################################################################
+
+custom_colors_100 <- c("white", "salmon2","orange", "darkgreen")
+breaks_100 <- c(-0.0001, 20, 100, 200, Inf)  
+labels_100 <- c("0% - 20%", "20% - 100%","100% - 200%", "> 200%")
+
+plot_SR100_12 <- ggplot(munics_12) +
+  geom_sf(aes(fill = cut(SR_100, breaks = breaks_100, labels = labels_100)), alpha = 0.9, color = NA) +
+  scale_fill_manual(
+    values = custom_colors_100,
+    labels = labels_100,
+    drop = FALSE
+  ) +
+  labs(
+    fill = "SR (>100)",
+    title = "2012"
+  ) +
+  theme_void() +
+  theme(
+    plot.background = element_rect(fill = "grey80"),
+    text = element_text(face = "bold"),
+    plot.title = element_text(hjust = .5),
+    plot.subtitle = element_text(hjust = .5)
+  )
+### 2014
+plot_SR100_14 <- ggplot(munics_14) +
+  geom_sf(aes(fill = cut(SR_100, breaks = breaks_100, labels = labels_100)), alpha = 0.9, color = NA) +
+  scale_fill_manual(
+    values = custom_colors_100,
+    labels = labels_100,
+    drop = FALSE
+  ) +
+  labs(
+    fill = "SR (>100)",
+    title = "2014"
+  ) +
+  theme_void() +
+  theme(
+    plot.background = element_rect(fill = "grey80"),
+    text = element_text(face = "bold"),
+    plot.title = element_text(hjust = .5),
+    plot.subtitle = element_text(hjust = .5)
+  )
+### 2016
+plot_SR100_16 <- ggplot(munics_16) +
+  geom_sf(aes(fill = cut(SR_100, breaks = breaks_100, labels = labels_100)), alpha = 0.9, color = NA) +
+  scale_fill_manual(
+    values = custom_colors_100,
+    labels = labels_100,
+    drop = FALSE
+  ) +
+  labs(
+    fill = "SR (>100)",
+    title = "2016"
+  ) +
+  theme_void() +
+  theme(
+    plot.background = element_rect(fill = "grey80"),
+    text = element_text(face = "bold"),
+    plot.title = element_text(hjust = .5),
+    plot.subtitle = element_text(hjust = .5)
+  )
+### 2018
+plot_SR100_18 <- ggplot(munics_18) +
+  geom_sf(aes(fill = cut(SR_100, breaks = breaks_100, labels = labels_100)), alpha = 0.9, color = NA) +
+  scale_fill_manual(
+    values = custom_colors_100,
+    labels = labels_100,
+    drop = FALSE
+  ) +
+  labs(
+    fill = "SR (>100)",
+    title = "2018"
+  ) +
+  theme_void() +
+  theme(
+    plot.background = element_rect(fill = "grey80"),
+    text = element_text(face = "bold"),
+    plot.title = element_text(hjust = .5),
+    plot.subtitle = element_text(hjust = .5)
+  )
+### 2020
+plot_SR100_20 <- ggplot(munics_20) +
+  geom_sf(aes(fill = cut(SR_100, breaks = breaks_100, labels = labels_100)), alpha = 0.9, color = NA) +
+  scale_fill_manual(
+    values = custom_colors_100,
+    labels = labels_100,
+    drop = FALSE
+  ) +
+  labs(
+    fill = "SR (>100)",
+    title = "2020"
+  ) +
+  theme_void() +
+  theme(
+    plot.background = element_rect(fill = "grey80"),
+    text = element_text(face = "bold"),
+    plot.title = element_text(hjust = .5),
+    plot.subtitle = element_text(hjust = .5)
+  )
+### 2022
+plot_SR100_22 <- ggplot(munics_22) +
+  geom_sf(aes(fill = cut(SR_100, breaks = breaks_100, labels = labels_100)), alpha = 0.9, color = NA) +
+  scale_fill_manual(
+    values = custom_colors_100,
+    labels = labels_100,
+    drop = FALSE
+  ) +
+  labs(
+    fill = "SR (>100)",
+    title = "2022"
+  ) +
+  theme_void() +
+  theme(
+    plot.background = element_rect(fill = "grey80"),
+    text = element_text(face = "bold"),
+    plot.title = element_text(hjust = .5),
+    plot.subtitle = element_text(hjust = .5)
+  )
+# Combine all the plots
+grid.arrange( plot_SR100_12, plot_SR100_14, plot_SR100_16, plot_SR100_18, plot_SR100_20, plot_SR100_22, nrow = 3, ncol = 2, 
+             widths = unit(c(8,8), "cm"),
+             heights = unit(c(5, 5, 5), "cm"))
+### Tables
+wanted_cols <- c("year","MUNICIPIO", "PROV", "SR_100")
+# Function to filter out Inf values and get the largest values
+get_largest_sr <- function(df, wanted_cols) {
+  df_filtered <- df[is.finite(df$SR_100), ]  # Exclude Inf values
+  df_sorted <- df_filtered[order(df_filtered$SR_100, decreasing = TRUE), ]  # Order by SR_100
+  head(df_sorted[, wanted_cols], 6)  # Extract the 6 largest values
+}
+# 2012
+largest_12 <- get_largest_sr(mf_12, wanted_cols)
+# 2014
+largest_14 <- get_largest_sr(mf_14, wanted_cols)
+# 2016
+largest_16 <- get_largest_sr(mf_16, wanted_cols)
+# 2018
+largest_18 <- get_largest_sr(mf_18, wanted_cols)
+# 2020
+largest_20 <- get_largest_sr(mf_20, wanted_cols)
+# 2022
+largest_22 <- get_largest_sr(mf_22, wanted_cols)
+# Combination
+largest_SR_100 <- rbind(largest_12, largest_14, largest_16, largest_18, largest_20, largest_22)
+### Time series
+fornelos <- c(
+  mf_12[mf_12$MUNICIPIO == "Fornelos de Montes", "SR_100"][[1]],
+  mf_14[mf_14$MUNICIPIO == "Fornelos de Montes", "SR_100"][[1]],
+  mf_16[mf_16$MUNICIPIO == "Fornelos de Montes", "SR_100"][[1]],
+  mf_18[mf_18$MUNICIPIO == "Fornelos de Montes", "SR_100"][[1]],
+  mf_20[mf_20$MUNICIPIO == "Fornelos de Montes", "SR_100"][[1]],
+  mf_22[mf_22$MUNICIPIO == "Fornelos de Montes", "SR_100"][[1]]
+)
+bergondo <- c(
+  mf_12[mf_12$MUNICIPIO == "Bergondo", "SR_100"][[1]],
+  mf_14[mf_14$MUNICIPIO == "Bergondo", "SR_100"][[1]],
+  mf_16[mf_16$MUNICIPIO == "Bergondo", "SR_100"][[1]],
+  mf_18[mf_18$MUNICIPIO == "Bergondo", "SR_100"][[1]],
+  mf_20[mf_20$MUNICIPIO == "Bergondo", "SR_100"][[1]],
+  mf_22[mf_22$MUNICIPIO == "Bergondo", "SR_100"][[1]]
+)
+lossilos <- c(
+  mf_12[mf_12$MUNICIPIO == "Los Silos", "SR_100"][[1]],
+  mf_14[mf_14$MUNICIPIO == "Los Silos", "SR_100"][[1]],
+  mf_16[mf_16$MUNICIPIO == "Los Silos", "SR_100"][[1]],
+  mf_18[mf_18$MUNICIPIO == "Los Silos", "SR_100"][[1]],
+  mf_20[mf_20$MUNICIPIO == "Los Silos", "SR_100"][[1]],
+  mf_22[mf_22$MUNICIPIO == "Los Silos", "SR_100"][[1]]
+)
+cabañas <- c(
+  mf_12[mf_12$MUNICIPIO == "Cabañas del Castillo", "SR_100"][[1]],
+  mf_14[mf_14$MUNICIPIO == "Cabañas del Castillo", "SR_100"][[1]],
+  mf_16[mf_16$MUNICIPIO == "Cabañas del Castillo", "SR_100"][[1]],
+  mf_18[mf_18$MUNICIPIO == "Cabañas del Castillo", "SR_100"][[1]],
+  mf_20[mf_20$MUNICIPIO == "Cabañas del Castillo", "SR_100"][[1]],
+  mf_22[mf_22$MUNICIPIO == "Cabañas del Castillo", "SR_100"][[1]]
+)
+aridane <- c(
+  mf_12[mf_12$MUNICIPIO == "Los Llanos de Aridane", "SR_100"][[1]],
+  mf_14[mf_14$MUNICIPIO == "Los Llanos de Aridane", "SR_100"][[1]],
+  mf_16[mf_16$MUNICIPIO == "Los Llanos de Aridane", "SR_100"][[1]],
+  mf_18[mf_18$MUNICIPIO == "Los Llanos de Aridane", "SR_100"][[1]],
+  mf_20[mf_20$MUNICIPIO == "Los Llanos de Aridane", "SR_100"][[1]],
+  mf_22[mf_22$MUNICIPIO == "Los Llanos de Aridane", "SR_100"][[1]]
+)
+villanueva <- c(
+  mf_12[mf_12$MUNICIPIO == "Villanueva de la Serena", "SR_100"][[1]],
+  mf_14[mf_14$MUNICIPIO == "Villanueva de la Serena", "SR_100"][[1]],
+  mf_16[mf_16$MUNICIPIO == "Villanueva de la Serena", "SR_100"][[1]],
+  mf_18[mf_18$MUNICIPIO == "Villanueva de la Serena", "SR_100"][[1]],
+  mf_20[mf_20$MUNICIPIO == "Villanueva de la Serena", "SR_100"][[1]],
+  mf_22[mf_22$MUNICIPIO == "Villanueva de la Serena", "SR_100"][[1]]
+)
+data_short <- data.frame(
+  Year = c(2012, 2014, 2016, 2018, 2020, 2022),
+  Fornelos_de_Montes = fornelos,
+  Bergondo = bergondo,
+  Los_Silos = lossilos,
+  Cabañas_del_Castillo = cabañas,
+  Los_Llanos_de_Aridane = aridane,
+  Villanueva_de_la_Serena = villanueva
+)
+# TIME SERIES
+data_long <- gather(data_short, key = "Municipality", value = "LocationIndex", -Year)
+ggplot(data_long, aes(x = Year, y = LocationIndex, color = Municipality, group = Municipality)) +
+  geom_line(linewidth = 1) +
+  geom_point(linewidth = 2) +
+  scale_x_continuous(
+    breaks = c(2012, 2014, 2016, 2018, 2020, 2022)
+  ) +
+  labs(title = NULL,
+       x = "Year",
+       y = "SR(>100)",
+       color = "Municipality") +
+  theme_minimal()+
+  theme(
+    legend.text = element_text(size = 18),    # Increase the legend text size
+    legend.title = element_text(size = 18)    # Increase the legend title size
+  )
