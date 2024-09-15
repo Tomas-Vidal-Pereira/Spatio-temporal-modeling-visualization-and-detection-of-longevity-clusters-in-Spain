@@ -12,7 +12,6 @@ library(GGally)
 library(forcats)
 library(tidyr)
 
-setwd("C:/Users/Usuario/Documents/MASTER/TFM")
 data.12 <- read_excel ("habsxcp-2012.xlsx")
 data.14 <- read_excel ("habsxcp-2014.xlsx")
 data.16 <- read_excel ("habsxcp-2016.xlsx")
