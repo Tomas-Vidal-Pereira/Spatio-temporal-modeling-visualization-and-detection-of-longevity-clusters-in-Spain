@@ -1494,6 +1494,153 @@ for (i in 1:length(provinces)){
   }
 }
 
+# 2012
+provs_12 <- esp_get_prov()
+
+provs_12$ine.prov.name <- factor(provs_12$ine.prov.name)
+
+provs_12 <- provs_12 %>%
+  mutate(ine.prov.name = fct_recode(ine.prov.name,
+                               "Almeria" = "Almería",
+                               "Alicante" = "Alicante/Alacant",
+                               "Alava" = "Araba/Álava",
+                               "Avila" = "Ávila",
+                               "Baleares" = "Balears, Illes",
+                               "La Rioja" = "Rioja, La",
+                               "Caceres" = "Cáceres",
+                               "Cadiz"="Cádiz",
+                               "Castellon" = "Castellón/Castelló",
+                               "Ciudad-real" = "Ciudad Real",
+                               "Cordoba" = "Córdoba",
+                               "Coruna"="Coruña, A",
+                               "Jaen" = "Jaén",
+                               "Las-palmas"="Palmas, Las",
+                               "Leon" = "León",
+                               "Malaga" = "Málaga",
+                               "Tenerife" = "Santa Cruz de Tenerife",
+                               "Valencia"="Valencia/València"
+                               )) # new name = old name
+# 2014
+provs_14 <- esp_get_prov()
+provs_14$ine.prov.name <- factor(provs_14$ine.prov.name)
+provs_14 <- provs_14 %>%
+  mutate(ine.prov.name = fct_recode(ine.prov.name,
+                               "Almeria" = "Almería",
+                               "Alicante" = "Alicante/Alacant",
+                               "Alava" = "Araba/Álava",
+                               "Avila" = "Ávila",
+                               "Baleares" = "Balears, Illes",
+                               "La Rioja" = "Rioja, La",
+                               "Caceres" = "Cáceres",
+                               "Cadiz"="Cádiz",
+                               "Castellon" = "Castellón/Castelló",
+                               "Ciudad-real" = "Ciudad Real",
+                               "Cordoba" = "Córdoba",
+                               "Coruna"="Coruña, A",
+                               "Jaen" = "Jaén",
+                               "Las-palmas"="Palmas, Las",
+                               "Leon" = "León",
+                               "Malaga" = "Málaga",
+                               "Tenerife" = "Santa Cruz de Tenerife",
+                               "Valencia"="Valencia/València"
+                               )) 
+# 2016
+provs_16 <- esp_get_prov()
+provs_16$ine.prov.name <- factor(provs_16$ine.prov.name)
+provs_16 <- provs_16 %>%
+  mutate(ine.prov.name = fct_recode(ine.prov.name,
+                               "Almeria" = "Almería",
+                               "Alicante" = "Alicante/Alacant",
+                               "Alava" = "Araba/Álava",
+                               "Avila" = "Ávila",
+                               "Baleares" = "Balears, Illes",
+                               "La Rioja" = "Rioja, La",
+                               "Caceres" = "Cáceres",
+                               "Cadiz"="Cádiz",
+                               "Castellon" = "Castellón/Castelló",
+                               "Ciudad-real" = "Ciudad Real",
+                               "Cordoba" = "Córdoba",
+                               "Coruna"="Coruña, A",
+                               "Jaen" = "Jaén",
+                               "Las-palmas"="Palmas, Las",
+                               "Leon" = "León",
+                               "Malaga" = "Málaga",
+                               "Tenerife" = "Santa Cruz de Tenerife",
+                               "Valencia"="Valencia/València"
+                               )) 
+# 2018
+provs_18 <- esp_get_prov()
+provs_18$ine.prov.name <- factor(provs_18$ine.prov.name)
+provs_18 <- provs_18 %>%
+  mutate(ine.prov.name = fct_recode(ine.prov.name,
+                               "Almeria" = "Almería",
+                               "Alicante" = "Alicante/Alacant",
+                               "Alava" = "Araba/Álava",
+                               "Avila" = "Ávila",
+                               "Baleares" = "Balears, Illes",
+                               "La Rioja" = "Rioja, La",
+                               "Caceres" = "Cáceres",
+                               "Cadiz"="Cádiz",
+                               "Castellon" = "Castellón/Castelló",
+                               "Ciudad-real" = "Ciudad Real",
+                               "Cordoba" = "Córdoba",
+                               "Coruna"="Coruña, A",
+                               "Jaen" = "Jaén",
+                               "Las-palmas"="Palmas, Las",
+                               "Leon" = "León",
+                               "Malaga" = "Málaga",
+                               "Tenerife" = "Santa Cruz de Tenerife",
+                               "Valencia"="Valencia/València"
+                               )) 
+# 2020
+provs_20 <- esp_get_prov()
+provs_20$ine.prov.name <- factor(provs_20$ine.prov.name)
+provs_20 <- provs_20 %>%
+  mutate(ine.prov.name = fct_recode(ine.prov.name,
+                               "Almeria" = "Almería",
+                               "Alicante" = "Alicante/Alacant",
+                               "Alava" = "Araba/Álava",
+                               "Avila" = "Ávila",
+                               "Baleares" = "Balears, Illes",
+                               "La Rioja" = "Rioja, La",
+                               "Caceres" = "Cáceres",
+                               "Cadiz"="Cádiz",
+                               "Castellon" = "Castellón/Castelló",
+                               "Ciudad-real" = "Ciudad Real",
+                               "Cordoba" = "Córdoba",
+                               "Coruna"="Coruña, A",
+                               "Jaen" = "Jaén",
+                               "Las-palmas"="Palmas, Las",
+                               "Leon" = "León",
+                               "Malaga" = "Málaga",
+                               "Tenerife" = "Santa Cruz de Tenerife",
+                               "Valencia"="Valencia/València"
+                               )) 
+# 2022
+provs_22 <- esp_get_prov()
+provs_22$ine.prov.name <- factor(provs_22$ine.prov.name)
+provs_22 <- provs_22 %>%
+  mutate(ine.prov.name = fct_recode(ine.prov.name,
+                               "Almeria" = "Almería",
+                               "Alicante" = "Alicante/Alacant",
+                               "Alava" = "Araba/Álava",
+                               "Avila" = "Ávila",
+                               "Baleares" = "Balears, Illes",
+                               "La Rioja" = "Rioja, La",
+                               "Caceres" = "Cáceres",
+                               "Cadiz"="Cádiz",
+                               "Castellon" = "Castellón/Castelló",
+                               "Ciudad-real" = "Ciudad Real",
+                               "Cordoba" = "Córdoba",
+                               "Coruna"="Coruña, A",
+                               "Jaen" = "Jaén",
+                               "Las-palmas"="Palmas, Las",
+                               "Leon" = "León",
+                               "Malaga" = "Málaga",
+                               "Tenerife" = "Santa Cruz de Tenerife",
+                               "Valencia"="Valencia/València"
+                               )) 
+
 ###############################################################
 # LOCATION INDEX OF THE CENTENARIAN POPULATION (MUNICIPALITIES)
 ###############################################################
